@@ -1,785 +1,514 @@
--- ============ ULTRA COOL FULLSCREEN LOADER ============
+-- ============ CYBER LOADER (v3) ============
 getgenv().GerixLoaderDone = false
-do
-    local Player = game:GetService("Players").LocalPlayer
+local okLoader = pcall(function()
+    local Players = game:GetService("Players")
+    local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
     local TweenService = game:GetService("TweenService")
     local Camera = workspace.CurrentCamera
 
+    local RED = Color3.fromRGB(255, 59, 92)
+    local PINK = Color3.fromRGB(255, 70, 190)
+    local WHITE = Color3.fromRGB(245, 245, 247)
+    local DIM = Color3.fromRGB(120, 120, 130)
+    local CHARS = "01ABCDEF<>/|[]{}#$%&*+=?"
+    local function rchar()
+        local i = math.random(1, #CHARS)
+        return CHARS:sub(i, i)
+    end
+
     local LoaderGui = Instance.new("ScreenGui")
     LoaderGui.Name = "GerixLoader"
     LoaderGui.IgnoreGuiInset = true
+    pcall(function() LoaderGui.ScreenInsets = Enum.ScreenInsets.None end)
     LoaderGui.ResetOnSpawn = false
     LoaderGui.DisplayOrder = 9999
     LoaderGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     LoaderGui.Parent = PlayerGui
 
     local Root = Instance.new("CanvasGroup")
+    Root.AnchorPoint = Vector2.new(0.5, 0.5)
+    Root.Position = UDim2.fromScale(0.5, 0.5)
     Root.Size = UDim2.fromScale(1, 1)
-    Root.BackgroundTransparency = 1
+    Root.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+    Root.BorderSizePixel = 0
     Root.GroupTransparency = 0
     Root.Parent = LoaderGui
 
+    local RootScale = Instance.new("UIScale")
+    RootScale.Scale = 1
+    RootScale.Parent = Root
+
     local vp = Camera.ViewportSize
-    local scale = math.clamp(math.min(vp.X / 1280, vp.Y / 720), 0.65, 1.4)
+    local scale = math.clamp(math.min(vp.X / 1280, vp.Y / 720) * 1.25, 0.8, 2)
     local function s(n) return math.max(1, math.floor(n * scale + 0.5)) end
 
-    local Background = Instance.new("Frame")
-    Background.Size = UDim2.fromScale(1, 1)
-    Background.BackgroundColor3 = Color3.fromRGB(3, 4, 12)
-    Background.BackgroundTransparency = 0
-    Background.BorderSizePixel = 0
-    Background.ZIndex = 1
-    Background.Parent = Root
-
-    local BgGrad = Instance.new("UIGradient")
-    BgGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(4, 6, 18)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 12, 35)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(3, 4, 12)),
-    })
-    BgGrad.Rotation = 90
-    BgGrad.Parent = Background
-
-    local nebulas = {}
-    local nebulaColors = {
-        Color3.fromRGB(90, 40, 180),
-        Color3.fromRGB(30, 80, 180),
-        Color3.fromRGB(150, 40, 130),
-        Color3.fromRGB(40, 130, 180),
-    }
-    for i = 1, 4 do
-        local Nebula = Instance.new("Frame")
-        local sx, sy = s(math.random(750, 1150)), s(math.random(600, 950))
-        Nebula.Size = UDim2.fromOffset(sx, sy)
-        Nebula.Position = UDim2.fromScale(math.random(), math.random())
-        Nebula.AnchorPoint = Vector2.new(0.5, 0.5)
-        Nebula.BackgroundColor3 = nebulaColors[i]
-        Nebula.BackgroundTransparency = 0.88
-        Nebula.BorderSizePixel = 0
-        Nebula.ZIndex = 2
-        Nebula.Parent = Background
-
-        local nCorner = Instance.new("UICorner")
-        nCorner.CornerRadius = UDim.new(0.5, 0)
-        nCorner.Parent = Nebula
-
-        local nGrad = Instance.new("UIGradient")
-        nGrad.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, nebulaColors[i]),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(3, 4, 12)),
-        })
-        nGrad.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.7),
-            NumberSequenceKeypoint.new(1, 1),
-        })
-        nGrad.Rotation = math.random(0, 360)
-        nGrad.Parent = Nebula
-
-        table.insert(nebulas, {frame = Nebula, grad = nGrad, baseSize = Vector2.new(sx, sy)})
+    -- grid
+    for i = 0, math.floor(vp.X / s(80)) + 1 do
+        local g = Instance.new("Frame")
+        g.Size = UDim2.new(0, 1, 1, 0)
+        g.Position = UDim2.fromOffset(i * s(80), 0)
+        g.BackgroundColor3 = RED
+        g.BackgroundTransparency = 0.95
+        g.BorderSizePixel = 0
+        g.ZIndex = 1
+        g.Parent = Root
+    end
+    for i = 0, math.floor(vp.Y / s(80)) + 1 do
+        local g = Instance.new("Frame")
+        g.Size = UDim2.new(1, 0, 0, 1)
+        g.Position = UDim2.fromOffset(0, i * s(80))
+        g.BackgroundColor3 = RED
+        g.BackgroundTransparency = 0.95
+        g.BorderSizePixel = 0
+        g.ZIndex = 1
+        g.Parent = Root
     end
 
-    task.spawn(function()
-        while LoaderGui.Parent do
-            for _, n in ipairs(nebulas) do
-                if n.frame.Parent then
-                    local nx = n.baseSize.X + s(math.random(-100, 100))
-                    local ny = n.baseSize.Y + s(math.random(-80, 80))
-                    TweenService:Create(n.frame, TweenInfo.new(6, Enum.EasingStyle.Sine), {
-                        Size = UDim2.fromOffset(nx, ny),
-                    }):Play()
-                    TweenService:Create(n.grad, TweenInfo.new(6, Enum.EasingStyle.Linear), {
-                        Rotation = n.grad.Rotation + 30,
-                    }):Play()
-                end
-            end
-            task.wait(6)
-        end
-    end)
-
-    local stars = {}
-    local function addStar(szMin, szMax, transp, z)
-        local star = Instance.new("Frame")
-        local sz = s(math.random(szMin, szMax))
-        star.Size = UDim2.fromOffset(sz, sz)
-        star.Position = UDim2.fromScale(math.random(), math.random())
-        star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        star.BackgroundTransparency = transp
-        star.BorderSizePixel = 0
-        star.ZIndex = z
-        star.Parent = Background
-
-        local c = Instance.new("UICorner")
-        c.CornerRadius = UDim.new(1, 0)
-        c.Parent = star
-
-        table.insert(stars, {frame = star, baseTransp = transp})
-    end
-
-    for i = 1, 80 do addStar(1, 2, 0.55, 2) end
-    for i = 1, 50 do addStar(2, 3, 0.35, 3) end
-    for i = 1, 25 do addStar(3, 5, 0.15, 4) end
-
-    task.spawn(function()
-        while LoaderGui.Parent do
-            local updated = 0
-            for _, data in ipairs(stars) do
-                if data.frame.Parent and math.random() < 0.35 then
-                    data.frame.BackgroundTransparency = math.clamp(
-                        data.baseTransp + (math.random(-30, 30) / 100), 0, 1
-                    )
-                    updated = updated + 1
-                    if updated >= 40 then break end
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-
-    local auroras = {}
-    for i = 1, 3 do
-        local Aurora = Instance.new("Frame")
-        local bandH = s(200 + (i * 50))
-        Aurora.Size = UDim2.new(1.5, 0, 0, bandH)
-        local baseY = -s(130) - (i * s(40))
-        Aurora.Position = UDim2.new(-0.25, 0, 1, baseY)
-        Aurora.BackgroundColor3 = Color3.fromRGB(40, 200, 180)
-        Aurora.BackgroundTransparency = 0.75
-        Aurora.BorderSizePixel = 0
-        Aurora.ZIndex = 3 + i
-        Aurora.Parent = Background
-
-        local aGrad = Instance.new("UIGradient")
-        aGrad.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(40, 200, 180)),
-            ColorSequenceKeypoint.new(0.6, Color3.fromRGB(80, 150, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)),
-        })
-        aGrad.Transparency = NumberSequence.new({
+    -- matrix rain
+    local colCount = math.min(48, math.max(12, math.floor(vp.X / s(24))))
+    local colW = vp.X / colCount
+    local colH = vp.Y * 1.2
+    local perCol = math.ceil(colH / s(15))
+    for c = 0, colCount - 1 do
+        local L = Instance.new("TextLabel")
+        L.Size = UDim2.fromOffset(colW, colH)
+        L.BackgroundTransparency = 1
+        L.Font = Enum.Font.Code
+        L.TextSize = s(15)
+        L.TextColor3 = RED
+        L.TextTransparency = 0.78 + math.random() * 0.12
+        L.TextYAlignment = Enum.TextYAlignment.Top
+        L.ClipsDescendants = true
+        L.ZIndex = 2
+        L.Parent = Root
+        local G = Instance.new("UIGradient")
+        G.Rotation = 90
+        G.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.4, 0.3),
-            NumberSequenceKeypoint.new(0.6, 0.3),
-            NumberSequenceKeypoint.new(1, 1),
+            NumberSequenceKeypoint.new(0.75, 0.7),
+            NumberSequenceKeypoint.new(1, 0),
         })
-        aGrad.Rotation = 90
-        aGrad.Parent = Aurora
-
-        table.insert(auroras, {frame = Aurora, grad = aGrad, phase = i * 2, baseY = baseY})
+        G.Parent = L
+        task.spawn(function()
+            task.wait(math.random() * 3)
+            while LoaderGui.Parent do
+                local t = table.create(perCol)
+                for i = 1, perCol do t[i] = rchar() end
+                L.Text = table.concat(t, "\n")
+                L.Position = UDim2.fromOffset(c * colW, -colH)
+                local tw = TweenService:Create(L, TweenInfo.new(math.random(40, 90) / 10, Enum.EasingStyle.Linear), {
+                    Position = UDim2.fromOffset(c * colW, vp.Y),
+                })
+                tw:Play()
+                tw.Completed:Wait()
+            end
+        end)
     end
 
-    task.spawn(function()
-        while LoaderGui.Parent do
-            local t = tick()
-            for _, a in ipairs(auroras) do
-                if a.frame.Parent then
-                    a.frame.Position = UDim2.new(-0.25 + math.sin(t * 0.6 + a.phase) * 0.1, 0, 1, a.baseY)
-                    a.grad.Offset = Vector2.new(math.sin(t * 0.4 + a.phase) * 0.2, 0)
-                end
-            end
-            task.wait(0.05)
-        end
-    end)
-
-    local moonSize = s(220)
-    local moonPosX, moonPosY = 0.8, 0.18
-
-    local MoonGlow = Instance.new("Frame")
-    local initGlowSize = s(700)
-    MoonGlow.Size = UDim2.fromOffset(initGlowSize, initGlowSize)
-    MoonGlow.Position = UDim2.new(moonPosX, -initGlowSize / 2, moonPosY, -initGlowSize / 2)
-    MoonGlow.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
-    MoonGlow.BorderSizePixel = 0
-    MoonGlow.ZIndex = 6
-    MoonGlow.Parent = Background
-
-    local MoonGlowGrad = Instance.new("UIGradient")
-    MoonGlowGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.6),
+    -- dark vignette behind the title so text stays readable
+    local Shade = Instance.new("Frame")
+    Shade.AnchorPoint = Vector2.new(0.5, 0.5)
+    Shade.Position = UDim2.fromScale(0.5, 0.45)
+    Shade.Size = UDim2.fromScale(1.1, 0.8)
+    Shade.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+    Shade.BorderSizePixel = 0
+    Shade.ZIndex = 3
+    Shade.Parent = Root
+    local ShadeCorner = Instance.new("UICorner")
+    ShadeCorner.CornerRadius = UDim.new(1, 0)
+    ShadeCorner.Parent = Shade
+    local ShadeGrad = Instance.new("UIGradient")
+    ShadeGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.05),
+        NumberSequenceKeypoint.new(0.6, 0.25),
         NumberSequenceKeypoint.new(1, 1),
     })
-    MoonGlowGrad.Rotation = 90
-    MoonGlowGrad.Parent = MoonGlow
+    ShadeGrad.Rotation = 90
+    ShadeGrad.Parent = Shade
 
-    local MoonGlowCorner = Instance.new("UICorner")
-    MoonGlowCorner.CornerRadius = UDim.new(1, 0)
-    MoonGlowCorner.Parent = MoonGlow
+    -- scanlines
+    for i = 0, math.floor(vp.Y / s(6)) do
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(1, 0, 0, 1)
+        line.Position = UDim2.fromOffset(0, i * s(6))
+        line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        line.BackgroundTransparency = 0.97
+        line.BorderSizePixel = 0
+        line.ZIndex = 4
+        line.Parent = Root
+    end
 
+    -- scan beam
+    local Beam = Instance.new("Frame")
+    Beam.Size = UDim2.new(1, 0, 0, s(140))
+    Beam.Position = UDim2.new(0, 0, 0, -s(140))
+    Beam.BackgroundColor3 = RED
+    Beam.BorderSizePixel = 0
+    Beam.ZIndex = 5
+    Beam.Parent = Root
+    local BeamGrad = Instance.new("UIGradient")
+    BeamGrad.Rotation = 90
+    BeamGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.9, 0.9),
+        NumberSequenceKeypoint.new(1, 0.7),
+    })
+    BeamGrad.Parent = Beam
     task.spawn(function()
-        while MoonGlow.Parent do
-            local glowSize = s(math.random(650, 780))
-            TweenService:Create(MoonGlow, TweenInfo.new(2.5, Enum.EasingStyle.Sine), {
-                Size = UDim2.fromOffset(glowSize, glowSize),
-                Position = UDim2.new(moonPosX, -glowSize / 2, moonPosY, -glowSize / 2),
-            }):Play()
-            task.wait(2.5)
+        while LoaderGui.Parent do
+            Beam.Position = UDim2.new(0, 0, 0, -s(140))
+            local tw = TweenService:Create(Beam, TweenInfo.new(2.6, Enum.EasingStyle.Linear), {
+                Position = UDim2.new(0, 0, 1, 0),
+            })
+            tw:Play()
+            tw.Completed:Wait()
         end
     end)
 
-    local orbitParticles = {}
-    for i = 1, 8 do
-        local particle = Instance.new("Frame")
-        local psize = s(5)
-        particle.Size = UDim2.fromOffset(psize, psize)
-        particle.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
-        particle.BorderSizePixel = 0
-        particle.ZIndex = 7
-        particle.Parent = Background
+    -- corner brackets
+    local function bracket(ax, ay, px, py)
+        local pos = UDim2.new(px, ax == 0 and s(30) or -s(30), py, ay == 0 and s(30) or -s(30))
+        local h = Instance.new("Frame")
+        h.Size = UDim2.fromOffset(s(60), 3)
+        h.AnchorPoint = Vector2.new(ax, ay)
+        h.Position = pos
+        h.BackgroundColor3 = RED
+        h.BorderSizePixel = 0
+        h.ZIndex = 8
+        h.Parent = Root
+        local v = Instance.new("Frame")
+        v.Size = UDim2.fromOffset(3, s(60))
+        v.AnchorPoint = Vector2.new(ax, ay)
+        v.Position = pos
+        v.BackgroundColor3 = RED
+        v.BorderSizePixel = 0
+        v.ZIndex = 8
+        v.Parent = Root
+    end
+    bracket(0, 0, 0, 0); bracket(1, 0, 1, 0); bracket(0, 1, 0, 1); bracket(1, 1, 1, 1)
 
-        local pc = Instance.new("UICorner")
-        pc.CornerRadius = UDim.new(1, 0)
-        pc.Parent = particle
+    -- rotating rings
+    local rings = {}
+    for i = 1, 3 do
+        local R = Instance.new("Frame")
+        local sz = s(240 + i * 120)
+        R.Size = UDim2.fromOffset(sz, sz)
+        R.AnchorPoint = Vector2.new(0.5, 0.5)
+        R.Position = UDim2.fromScale(0.5, 0.4)
+        R.BackgroundTransparency = 1
+        R.ZIndex = 6
+        R.Parent = Root
+        local st = Instance.new("UIStroke")
+        st.Color = (i == 2) and PINK or RED
+        st.Thickness = (i == 2) and 1 or 2
+        st.Transparency = 0.45 + i * 0.1
+        st.Parent = R
+        table.insert(rings, { frame = R, speed = ((i % 2 == 0) and -1 or 1) * (18 + i * 16), rot = math.random(0, 90) })
+    end
+    task.spawn(function()
+        local last = tick()
+        while LoaderGui.Parent do
+            local now = tick()
+            local dt = now - last
+            last = now
+            for _, r in ipairs(rings) do
+                r.rot = r.rot + r.speed * dt
+                r.frame.Rotation = r.rot
+            end
+            task.wait()
+        end
+    end)
 
-        table.insert(orbitParticles, {frame = particle, offset = (i / 8) * math.pi * 2})
+    -- title + ghost
+    local TARGET = "GERIX//HUB"
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, s(140))
+    Title.Position = UDim2.new(0, 0, 0.4, -s(70))
+    Title.BackgroundTransparency = 1
+    Title.Text = ""
+    Title.Font = Enum.Font.Code
+    Title.TextSize = s(110)
+    Title.TextColor3 = WHITE
+    Title.ZIndex = 12
+    Title.Parent = Root
+
+    local Ghost = Title:Clone()
+    Ghost.TextColor3 = RED
+    Ghost.ZIndex = 11
+    Ghost.Parent = Root
+
+    local Ghost2 = Title:Clone()
+    Ghost2.TextColor3 = Color3.fromRGB(60, 220, 255)
+    Ghost2.TextTransparency = 0.5
+    Ghost2.ZIndex = 10
+    Ghost2.Parent = Root
+
+    local function setTitle(txt)
+        Title.Text = txt
+        Ghost.Text = txt
+        Ghost2.Text = txt
     end
 
+    local Sub = Instance.new("TextLabel")
+    Sub.Size = UDim2.new(1, 0, 0, s(30))
+    Sub.Position = UDim2.new(0, 0, 0.4, s(76))
+    Sub.BackgroundTransparency = 1
+    Sub.Text = "[ PRISON LIFE ]  //  BUILD 0.3"
+    Sub.Font = Enum.Font.Code
+    Sub.TextSize = s(24)
+    Sub.TextColor3 = DIM
+    Sub.ZIndex = 12
+    Sub.Parent = Root
+
+    -- HUD corner text
+    local function hud(text, ax, ay, px, py, col)
+        local l = Instance.new("TextLabel")
+        l.AnchorPoint = Vector2.new(ax, ay)
+        l.Position = UDim2.new(px, ax == 0 and s(104) or -s(104), py, ay == 0 and s(34) or -s(34))
+        l.Size = UDim2.fromOffset(s(360), s(22))
+        l.BackgroundTransparency = 1
+        l.Font = Enum.Font.Code
+        l.TextSize = s(16)
+        l.TextColor3 = col or DIM
+        l.TextXAlignment = ax == 0 and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right
+        l.Text = text
+        l.ZIndex = 12
+        l.Parent = Root
+        return l
+    end
+    local HudStatus = hud("● SYS//ONLINE", 0, 0, 0, 0, RED)
+    local HudClock = hud(os.date("%H:%M:%S"), 1, 0, 1, 0)
+    hud("USER // " .. Player.Name, 0, 1, 0, 1)
+    hud("NODE // " .. string.format("%04X-%04X", math.random(0, 65535), math.random(0, 65535)), 1, 1, 1, 1)
     task.spawn(function()
         while LoaderGui.Parent do
-            local t = tick() * 0.8
-            local radius = s(160)
-            for _, p in ipairs(orbitParticles) do
-                if p.frame.Parent then
-                    local a = t + p.offset
-                    p.frame.Position = UDim2.new(moonPosX, -s(2) + math.cos(a) * radius, moonPosY, -s(2) + math.sin(a) * radius * 0.5)
-                    p.frame.BackgroundTransparency = 0.3 + math.abs(math.sin(a * 2)) * 0.4
-                end
-            end
+            HudStatus.TextTransparency = (HudStatus.TextTransparency == 0) and 0.6 or 0
+            HudClock.Text = os.date("%H:%M:%S")
+            task.wait(0.4)
+        end
+    end)
+
+    -- boot log
+    local Log = Instance.new("TextLabel")
+    Log.Size = UDim2.fromOffset(s(760), s(170))
+    Log.AnchorPoint = Vector2.new(0.5, 0)
+    Log.Position = UDim2.new(0.5, 0, 0.6, 0)
+    Log.BackgroundTransparency = 1
+    Log.Font = Enum.Font.Code
+    Log.TextSize = s(18)
+    Log.TextColor3 = Color3.fromRGB(170, 170, 180)
+    Log.TextXAlignment = Enum.TextXAlignment.Left
+    Log.TextYAlignment = Enum.TextYAlignment.Bottom
+    Log.Text = ""
+    Log.ZIndex = 12
+    Log.Parent = Root
+
+    -- progress bar
+    local barW = math.clamp(s(900), 320, vp.X * 0.8)
+    local BarGlow = Instance.new("Frame")
+    BarGlow.Size = UDim2.fromOffset(barW + s(50), s(44))
+    BarGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    BarGlow.Position = UDim2.new(0.5, 0, 0.84, s(5))
+    BarGlow.BackgroundColor3 = RED
+    BarGlow.BackgroundTransparency = 0.9
+    BarGlow.BorderSizePixel = 0
+    BarGlow.ZIndex = 9
+    BarGlow.Parent = Root
+    local BGC = Instance.new("UICorner")
+    BGC.CornerRadius = UDim.new(1, 0)
+    BGC.Parent = BarGlow
+    task.spawn(function()
+        while BarGlow.Parent do
+            BarGlow.BackgroundTransparency = 0.86 + math.sin(tick() * 3) * 0.05
             task.wait(0.03)
         end
     end)
 
-    local Moon = Instance.new("Frame")
-    Moon.Size = UDim2.fromOffset(moonSize, moonSize)
-    Moon.Position = UDim2.new(moonPosX, -moonSize / 2, moonPosY, -moonSize / 2)
-    Moon.BackgroundColor3 = Color3.fromRGB(245, 245, 225)
-    Moon.BorderSizePixel = 0
-    Moon.ZIndex = 8
-    Moon.Parent = Background
+    local Bar = Instance.new("Frame")
+    Bar.Size = UDim2.fromOffset(barW, s(10))
+    Bar.AnchorPoint = Vector2.new(0.5, 0)
+    Bar.Position = UDim2.new(0.5, 0, 0.84, 0)
+    Bar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+    Bar.BorderSizePixel = 0
+    Bar.ClipsDescendants = true
+    Bar.ZIndex = 12
+    Bar.Parent = Root
+    local BarStroke = Instance.new("UIStroke")
+    BarStroke.Color = RED
+    BarStroke.Thickness = 1
+    BarStroke.Transparency = 0.5
+    BarStroke.Parent = Bar
 
-    local MoonCorner = Instance.new("UICorner")
-    MoonCorner.CornerRadius = UDim.new(1, 0)
-    MoonCorner.Parent = Moon
-
-    local MoonGradient = Instance.new("UIGradient")
-    MoonGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 245)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 180)),
+    local Fill = Instance.new("Frame")
+    Fill.Size = UDim2.fromScale(0, 1)
+    Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Fill.BorderSizePixel = 0
+    Fill.ZIndex = 13
+    Fill.Parent = Bar
+    local FillGrad = Instance.new("UIGradient")
+    FillGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, RED),
+        ColorSequenceKeypoint.new(1, PINK),
     })
-    MoonGradient.Parent = Moon
+    FillGrad.Parent = Fill
 
+    local Shine = Instance.new("Frame")
+    Shine.Size = UDim2.fromOffset(s(140), s(10))
+    Shine.Position = UDim2.fromOffset(-s(140), 0)
+    Shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Shine.BorderSizePixel = 0
+    Shine.ZIndex = 14
+    Shine.Parent = Bar
+    local ShineGrad = Instance.new("UIGradient")
+    ShineGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.5, 0.6),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    ShineGrad.Parent = Shine
     task.spawn(function()
-        while MoonGradient.Parent do
-            MoonGradient.Rotation = (MoonGradient.Rotation + 1) % 360
-            task.wait(0.05)
-        end
-    end)
-
-    for i = 1, 10 do
-        local Crater = Instance.new("Frame")
-        local cs = s(math.random(10, 40))
-        Crater.Size = UDim2.fromOffset(cs, cs)
-        Crater.Position = UDim2.fromScale(math.random(10, 80) / 100, math.random(10, 80) / 100)
-        Crater.BackgroundColor3 = Color3.fromRGB(195, 195, 175)
-        Crater.BackgroundTransparency = 0.25
-        Crater.BorderSizePixel = 0
-        Crater.ZIndex = 9
-        Crater.Parent = Moon
-
-        local cc = Instance.new("UICorner")
-        cc.CornerRadius = UDim.new(1, 0)
-        cc.Parent = Crater
-    end
-
-    task.spawn(function()
-        while LoaderGui.Parent do
-            task.wait(math.random(12, 28) / 10)
-            local ss = Instance.new("Frame")
-            ss.Size = UDim2.fromOffset(s(math.random(120, 260)), s(2))
-            ss.Position = UDim2.fromScale(math.random() * 0.6, math.random() * 0.4)
-            ss.Rotation = 35
-            ss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            ss.BorderSizePixel = 0
-            ss.ZIndex = 5
-            ss.Parent = Background
-
-            local sg = Instance.new("UIGradient")
-            sg.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.5, 0),
-                NumberSequenceKeypoint.new(1, 1),
+        while Bar.Parent do
+            Shine.Position = UDim2.fromOffset(-s(140), 0)
+            local tw = TweenService:Create(Shine, TweenInfo.new(1.1, Enum.EasingStyle.Linear), {
+                Position = UDim2.fromOffset(barW, 0),
             })
-            sg.Parent = ss
-
-            local tw = TweenService:Create(ss,
-                TweenInfo.new(math.random(7, 12) / 10, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                    Position = ss.Position + UDim2.fromScale(0.5, 0.3),
-                    BackgroundTransparency = 1,
-                })
             tw:Play()
-            tw.Completed:Connect(function() if ss.Parent then ss:Destroy() end end)
+            tw.Completed:Wait()
+            task.wait(0.3)
         end
     end)
 
-    local TitleGlow = Instance.new("Frame")
-    local tgW, tgH = s(1000), s(340)
-    TitleGlow.Size = UDim2.fromOffset(tgW, tgH)
-    TitleGlow.Position = UDim2.new(0.5, -tgW / 2, 0.4, -tgH / 2)
-    TitleGlow.BackgroundColor3 = Color3.fromRGB(96, 165, 250)
-    TitleGlow.BorderSizePixel = 0
-    TitleGlow.ZIndex = 19
-    TitleGlow.Parent = Background
+    local Pct = Instance.new("TextLabel")
+    Pct.Size = UDim2.fromOffset(barW, s(30))
+    Pct.AnchorPoint = Vector2.new(0.5, 0)
+    Pct.Position = UDim2.new(0.5, 0, 0.84, s(20))
+    Pct.BackgroundTransparency = 1
+    Pct.Font = Enum.Font.Code
+    Pct.TextSize = s(24)
+    Pct.TextColor3 = WHITE
+    Pct.TextXAlignment = Enum.TextXAlignment.Right
+    Pct.Text = "000%"
+    Pct.ZIndex = 12
+    Pct.Parent = Root
 
-    local tg = Instance.new("UIGradient")
-    tg.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.5, 0.85),
-        NumberSequenceKeypoint.new(1, 1),
-    })
-    tg.Parent = TitleGlow
+    local Stage = Instance.new("TextLabel")
+    Stage.Size = UDim2.fromOffset(barW, s(30))
+    Stage.AnchorPoint = Vector2.new(0.5, 0)
+    Stage.Position = UDim2.new(0.5, 0, 0.84, s(20))
+    Stage.BackgroundTransparency = 1
+    Stage.Font = Enum.Font.Code
+    Stage.TextSize = s(20)
+    Stage.TextColor3 = DIM
+    Stage.TextXAlignment = Enum.TextXAlignment.Left
+    Stage.Text = "INITIALIZING"
+    Stage.ZIndex = 12
+    Stage.Parent = Root
 
-    local tgc = Instance.new("UICorner")
-    tgc.CornerRadius = UDim.new(1, 0)
-    tgc.Parent = TitleGlow
-
-    task.spawn(function()
-        while TitleGlow.Parent do
-            local pulse = 0.7 + math.abs(math.sin(tick() * 1.5)) * 0.2
-            tg.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.5, pulse),
-                NumberSequenceKeypoint.new(1, 1),
-            })
-            task.wait(0.05)
-        end
-    end)
-
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, s(100))
-    Title.Position = UDim2.new(0, 0, 0.4, -s(95))
-    Title.BackgroundTransparency = 1
-    Title.Text = "Welcome to Gerix Hub"
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = s(72)
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextTransparency = 1
-    Title.ZIndex = 21
-    Title.Parent = Background
-
-    local TitleStroke = Instance.new("UIStroke")
-    TitleStroke.Color = Color3.fromRGB(96, 165, 250)
-    TitleStroke.Thickness = 3
-    TitleStroke.Transparency = 1
-    TitleStroke.Parent = Title
-
-    local TitleGradient = Instance.new("UIGradient")
-    TitleGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(96, 165, 250)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(240, 245, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(96, 165, 250)),
-    })
-    TitleGradient.Parent = Title
-
-    task.spawn(function()
-        while Title.Parent do
-            local t = 0
-            while t < 1 and Title.Parent do
-                t = t + 0.012
-                TitleGradient.Offset = Vector2.new(t, 0)
-                task.wait(0.016)
-            end
-        end
-    end)
-
-    task.spawn(function()
-        local elapsed = 0
-        while Title.Parent and elapsed < 8 do
-            elapsed = elapsed + 0.1
-            if Title.TextTransparency < 0.3 then
-                local sparkle = Instance.new("Frame")
-                local ss = s(math.random(4, 8))
-                sparkle.Size = UDim2.fromOffset(ss, ss)
-                sparkle.Position = UDim2.new(0.1 + math.random() * 0.8, 0, 0.4 + (math.random(-20, 40) / 100), 0)
-                sparkle.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
-                sparkle.BorderSizePixel = 0
-                sparkle.ZIndex = 22
-                sparkle.Parent = Background
-
-                local sc = Instance.new("UICorner")
-                sc.CornerRadius = UDim.new(1, 0)
-                sc.Parent = sparkle
-
-                local life = math.random(4, 8) / 10
-                TweenService:Create(sparkle, TweenInfo.new(life), {
-                    Position = sparkle.Position + UDim2.fromOffset(0, -s(30)),
-                    BackgroundTransparency = 1,
-                }):Play()
-                task.delay(life, function()
-                    if sparkle and sparkle.Parent then sparkle:Destroy() end
-                end)
-            end
-            task.wait(0.1)
-        end
-    end)
-
-    local Subtitle = Instance.new("TextLabel")
-    Subtitle.Size = UDim2.new(1, 0, 0, s(36))
-    Subtitle.Position = UDim2.new(0, 0, 0.4, s(15))
-    Subtitle.BackgroundTransparency = 1
-    Subtitle.Text = "— Prison Life —"
-    Subtitle.Font = Enum.Font.Gotham
-    Subtitle.TextSize = s(22)
-    Subtitle.TextColor3 = Color3.fromRGB(150, 180, 220)
-    Subtitle.TextTransparency = 1
-    Subtitle.ZIndex = 21
-    Subtitle.Parent = Background
-
-    local barWidth = math.clamp(s(760), 380, vp.X * 0.85)
-    local barHeight = s(14)
-    local barY = 0.74
-
-    local BarContainer = Instance.new("Frame")
-    BarContainer.Size = UDim2.fromOffset(barWidth, barHeight)
-    BarContainer.Position = UDim2.new(0.5, -barWidth / 2, barY, 0)
-    BarContainer.BackgroundColor3 = Color3.fromRGB(20, 25, 45)
-    BarContainer.BorderSizePixel = 0
-    BarContainer.ZIndex = 20
-    BarContainer.Parent = Background
-
-    local bc = Instance.new("UICorner")
-    bc.CornerRadius = UDim.new(1, 0)
-    bc.Parent = BarContainer
-
-    local bs = Instance.new("UIStroke")
-    bs.Color = Color3.fromRGB(96, 165, 250)
-    bs.Thickness = 2
-    bs.Transparency = 0.3
-    bs.Parent = BarContainer
-
-    local BarGlow = Instance.new("Frame")
-    local barGlowW = barWidth + s(90)
-    local barGlowH = s(70)
-    BarGlow.Size = UDim2.fromOffset(barGlowW, barGlowH)
-    BarGlow.Position = UDim2.new(0.5, -barGlowW / 2, 0.5, -barGlowH / 2)
-    BarGlow.BackgroundColor3 = Color3.fromRGB(96, 165, 250)
-    BarGlow.BackgroundTransparency = 0.9
-    BarGlow.BorderSizePixel = 0
-    BarGlow.ZIndex = 19
-    BarGlow.Parent = BarContainer
-
-    local bgc = Instance.new("UICorner")
-    bgc.CornerRadius = UDim.new(1, 0)
-    bgc.Parent = BarGlow
-
-    local bgg = Instance.new("UIGradient")
-    bgg.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.5, 0.7),
-        NumberSequenceKeypoint.new(1, 1),
-    })
-    bgg.Rotation = 90
-    bgg.Parent = BarGlow
-
-    task.spawn(function()
-        while BarGlow.Parent do
-            BarGlow.BackgroundTransparency = 0.85 + math.sin(tick() * 2) * 0.05
-            task.wait(0.05)
-        end
-    end)
-
-    local BarFill = Instance.new("Frame")
-    BarFill.Size = UDim2.new(0, 0, 1, 0)
-    BarFill.BackgroundColor3 = Color3.fromRGB(96, 165, 250)
-    BarFill.BorderSizePixel = 0
-    BarFill.ZIndex = 21
-    BarFill.Parent = BarContainer
-
-    local fc = Instance.new("UICorner")
-    fc.CornerRadius = UDim.new(1, 0)
-    fc.Parent = BarFill
-
-    local fg = Instance.new("UIGradient")
-    fg.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(96, 165, 250)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 230, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 200, 255)),
-    })
-    fg.Parent = BarFill
-
-    task.spawn(function()
-        while BarFill.Parent do
-            local t = 0
-            while t < 1 and BarFill.Parent do
-                t = t + 0.025
-                fg.Offset = Vector2.new(t, 0)
-                task.wait(0.016)
-            end
-        end
-    end)
-
-    local PercentText = Instance.new("TextLabel")
-    PercentText.Size = UDim2.new(1, 0, 0, s(50))
-    PercentText.Position = UDim2.new(0, 0, barY, barHeight + s(22))
-    PercentText.BackgroundTransparency = 1
-    PercentText.Text = "0%"
-    PercentText.Font = Enum.Font.GothamBold
-    PercentText.TextSize = s(38)
-    PercentText.TextColor3 = Color3.fromRGB(200, 220, 255)
-    PercentText.TextTransparency = 1
-    PercentText.TextXAlignment = Enum.TextXAlignment.Center
-    PercentText.ZIndex = 20
-    PercentText.Parent = Background
-
-    local StatusText = Instance.new("TextLabel")
-    StatusText.Size = UDim2.fromOffset(barWidth, s(30))
-    StatusText.Position = UDim2.new(0.5, -barWidth / 2, barY, -s(42))
-    StatusText.BackgroundTransparency = 1
-    StatusText.Text = ""
-    StatusText.Font = Enum.Font.Gotham
-    StatusText.TextSize = s(18)
-    StatusText.TextColor3 = Color3.fromRGB(130, 150, 180)
-    StatusText.TextTransparency = 1
-    StatusText.TextXAlignment = Enum.TextXAlignment.Center
-    StatusText.ZIndex = 20
-    StatusText.Parent = Background
-
-    local FinalText = Instance.new("TextLabel")
-    FinalText.Size = UDim2.new(1, 0, 0, s(160))
-    FinalText.Position = UDim2.new(0, 0, 0.5, -s(80))
-    FinalText.BackgroundTransparency = 1
-    FinalText.Text = "Welcome Gerix Player"
-    FinalText.Font = Enum.Font.GothamBold
-    FinalText.TextSize = s(90)
-    FinalText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FinalText.TextTransparency = 1
-    FinalText.TextStrokeTransparency = 1
-    FinalText.TextStrokeColor3 = Color3.fromRGB(96, 165, 250)
-    FinalText.ZIndex = 40
-    FinalText.Parent = Background
-
-    local FinalGradient = Instance.new("UIGradient")
-    FinalGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(96, 165, 250)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(240, 245, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(96, 165, 250)),
-    })
-    FinalGradient.Parent = FinalText
-
-    task.spawn(function()
-        for i = 1, 25 do
-            local t = 1 - (i / 25)
-            Title.TextTransparency = t
-            TitleStroke.Transparency = t
-            task.wait(0.02)
-        end
-        for i = 1, 15 do
-            local t = 1 - (i / 15)
-            Subtitle.TextTransparency = t
-            StatusText.TextTransparency = t
-            PercentText.TextTransparency = t
-            task.wait(0.02)
-        end
-    end)
-
-    local function burst(originX, originY, count, color)
-        for i = 1, count do
-            local p = Instance.new("Frame")
-            local size = s(math.random(3, 6))
-            p.Size = UDim2.fromOffset(size, size)
-            p.Position = UDim2.new(originX, -size / 2, originY, -size / 2)
-            p.BackgroundColor3 = color
-            p.BorderSizePixel = 0
-            p.ZIndex = 30
-            p.Parent = Background
-
-            local pc = Instance.new("UICorner")
-            pc.CornerRadius = UDim.new(1, 0)
-            pc.Parent = p
-
-            local angle = math.random() * math.pi * 2
-            local dist = s(math.random(80, 260))
-            local dx = math.cos(angle) * dist
-            local dy = math.sin(angle) * dist
-
-            TweenService:Create(p, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = p.Position + UDim2.fromOffset(dx, dy),
-                BackgroundTransparency = 1,
-                Size = UDim2.fromOffset(1, 1),
-            }):Play()
-            task.delay(1, function()
-                if p and p.Parent then p:Destroy() end
-            end)
-        end
-    end
-
-    local statusMessages = {
-        "Waking up the moon...",
-        "Painting the night sky...",
-        "Sprinkling stardust...",
-        "Loading modules...",
-        "Connecting to server...",
-        "Polishing effects...",
-        "Almost there...",
-        "Welcome, player!",
+    local lines = {
+        "> mounting interface ................ ok",
+        "> resolving remotes ................. ok",
+        "> hooking input layer ............... ok",
+        "> compiling theme ................... ok",
+        "> syncing config .................... ok",
+        "> handshake ......................... ok",
+        "> access granted.",
     }
+    local stages = { "INITIALIZING", "LINKING", "INJECTING", "BUILDING UI", "SYNCING", "VERIFYING", "READY" }
+    local feed = {}
+    local function pushLine(t)
+        table.insert(feed, t)
+        if #feed > 6 then table.remove(feed, 1) end
+        Log.Text = table.concat(feed, "\n")
+    end
 
-    local function typewriter(text, label)
-        label.Text = ""
-        for i = 1, #text do
-            label.Text = text:sub(1, i)
-            task.wait(0.015)
+    -- title decrypt + glitch
+    task.spawn(function()
+        local steps = 28
+        for step = 1, steps do
+            local reveal = math.floor(step / steps * #TARGET)
+            local out = {}
+            for i = 1, #TARGET do
+                out[i] = (i <= reveal) and TARGET:sub(i, i) or rchar()
+            end
+            setTitle(table.concat(out))
+            task.wait(0.045)
         end
-    end
+        setTitle(TARGET)
+        while Title.Parent do
+            task.wait(math.random(8, 20) / 10)
+            for _ = 1, 5 do
+                local ox = math.random(-10, 10)
+                Ghost.Position = UDim2.new(0, ox, 0.4, -s(70) + math.random(-4, 4))
+                Ghost2.Position = UDim2.new(0, -ox, 0.4, -s(70) + math.random(-4, 4))
+                Title.TextColor3 = math.random() > 0.5 and RED or WHITE
+                task.wait(0.04)
+            end
+            Ghost.Position = UDim2.new(0, 0, 0.4, -s(70))
+            Ghost2.Position = UDim2.new(0, 0, 0.4, -s(70))
+            Title.TextColor3 = WHITE
+        end
+    end)
 
-    local function setProgress(value)
-        value = math.clamp(value, 0, 100)
-        BarFill:TweenSize(UDim2.new(value / 100, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
-        PercentText.Text = math.floor(value) .. "%"
-        local hue = 0.55 + (value / 100) * 0.15
-        PercentText.TextColor3 = Color3.fromHSV(hue % 1, 0.4, 1)
-    end
-
+    -- main sequence
     task.spawn(function()
         pcall(function()
-            task.wait(0.8)
-            local lastBurst = 10
-            local lastMessageIdx = 0
-            local vp2 = Camera.ViewportSize
-
-            for i = 10, 100 do
-                setProgress(i)
-
-                local idx = math.min(#statusMessages, math.floor((i - 10) / 12) + 1)
-                if idx ~= lastMessageIdx then
-                    lastMessageIdx = idx
-                    task.spawn(function() typewriter(statusMessages[idx], StatusText) end)
+            task.wait(1.6)
+            local shown = 0
+            for i = 0, 100 do
+                Fill:TweenSize(UDim2.fromScale(i / 100, 1), Enum.EasingDirection.Out, Enum.EasingStyle.Linear, 0.05, true)
+                Pct.Text = string.format("%03d%%", i)
+                local want = math.min(#lines, math.floor(i / 100 * #lines + 0.0001))
+                while shown < want do
+                    shown = shown + 1
+                    pushLine(lines[shown])
+                    Stage.Text = stages[shown]
                 end
-
-                if i >= lastBurst + 10 then
-                    lastBurst = i
-                    local barX = (BarContainer.AbsolutePosition.X + BarFill.AbsoluteSize.X) / vp2.X
-                    local barY2 = (BarContainer.AbsolutePosition.Y + barHeight / 2) / vp2.Y
-                    burst(barX, barY2, 8, Color3.fromRGB(150, 200, 255))
-                end
-
-                if i < 30 then
-                    task.wait(0.035)
-                elseif i < 70 then
-                    task.wait(0.02)
-                else
-                    task.wait(0.045)
-                end
+                task.wait(i < 60 and 0.02 or 0.032)
+            end
+            while shown < #lines do
+                shown = shown + 1
+                pushLine(lines[shown])
+                Stage.Text = stages[shown]
             end
 
-            StatusText.Text = "Welcome to Gerix Hub!"
-            StatusText.TextColor3 = Color3.fromRGB(200, 240, 255)
-            task.wait(0.3)
+            task.wait(0.35)
+            Title.TextSize = s(84)
+            Ghost.TextSize = s(84)
+            Ghost2.TextSize = s(84)
+            setTitle("ACCESS GRANTED")
+            Pct.TextColor3 = RED
+            Stage.TextColor3 = RED
 
             local flash = Instance.new("Frame")
             flash.Size = UDim2.fromScale(1, 1)
-            flash.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
+            flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             flash.BackgroundTransparency = 1
             flash.BorderSizePixel = 0
             flash.ZIndex = 50
             flash.Parent = Root
-
-            TweenService:Create(flash, TweenInfo.new(0.15), { BackgroundTransparency = 0 }):Play()
-            task.wait(0.15)
+            TweenService:Create(flash, TweenInfo.new(0.1), { BackgroundTransparency = 0.2 }):Play()
+            task.wait(0.1)
             TweenService:Create(flash, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
 
-            burst(0.5, 0.5, 50, Color3.fromRGB(150, 200, 255))
-            burst(0.5, 0.5, 40, Color3.fromRGB(200, 150, 255))
-            burst(0.5, 0.5, 40, Color3.fromRGB(150, 255, 220))
-
-            local origPos = Background.Position
-            for i = 1, 8 do
-                Background.Position = origPos + UDim2.fromOffset(math.random(-6, 6), math.random(-6, 6))
+            for _ = 1, 12 do
+                Root.Position = UDim2.new(0.5, math.random(-8, 8), 0.5, math.random(-8, 8))
                 task.wait(0.03)
             end
-            Background.Position = origPos
-            task.wait(0.35)
-
-            for _, el in ipairs({Title, Subtitle, PercentText, StatusText}) do
-                TweenService:Create(el, TweenInfo.new(0.35), { TextTransparency = 1 }):Play()
-            end
-            TweenService:Create(TitleStroke, TweenInfo.new(0.35), { Transparency = 1 }):Play()
-            TweenService:Create(BarContainer, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
-            TweenService:Create(bs, TweenInfo.new(0.35), { Transparency = 1 }):Play()
-            TweenService:Create(BarFill, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
-            TweenService:Create(BarGlow, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
-
-            task.wait(0.35)
-
-            FinalText.TextTransparency = 1
-            FinalText.TextStrokeTransparency = 1
-
-            local uiScale = Instance.new("UIScale")
-            uiScale.Scale = 0.3
-            uiScale.Parent = FinalText
-
-            TweenService:Create(FinalText, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                TextTransparency = 0,
-                TextStrokeTransparency = 0.4,
-            }):Play()
-            TweenService:Create(uiScale, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Scale = 1,
-            }):Play()
-
-            task.spawn(function()
-                local t = 0
-                while FinalText.Parent and FinalText.TextTransparency < 0.5 do
-                    t = (t + 0.02) % 1
-                    FinalGradient.Offset = Vector2.new(t, 0)
-                    task.wait(0.03)
-                end
-            end)
-
-            task.spawn(function()
-                for i = 1, 28 do
-                    if not FinalText.Parent then return end
-                    local sparkle = Instance.new("Frame")
-                    local ss = s(math.random(6, 12))
-                    sparkle.Size = UDim2.fromOffset(ss, ss)
-                    sparkle.Position = UDim2.new(math.random(), 0, 0.5 + (math.random(-20, 20) / 100), 0)
-                    sparkle.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
-                    sparkle.BorderSizePixel = 0
-                    sparkle.ZIndex = 41
-                    sparkle.Parent = Background
-
-                    local sc = Instance.new("UICorner")
-                    sc.CornerRadius = UDim.new(1, 0)
-                    sc.Parent = sparkle
-
-                    TweenService:Create(sparkle, TweenInfo.new(1.2), {
-                        Position = sparkle.Position + UDim2.fromOffset(0, -s(50)),
-                        BackgroundTransparency = 1,
-                        Size = UDim2.fromOffset(1, 1),
-                    }):Play()
-                    task.delay(1.3, function()
-                        if sparkle and sparkle.Parent then sparkle:Destroy() end
-                    end)
-                    task.wait(0.06)
-                end
-            end)
-
-            task.wait(0.25)
-            burst(0.5, 0.5, 30, Color3.fromRGB(150, 200, 255))
-            burst(0.5, 0.5, 20, Color3.fromRGB(200, 150, 255))
-
-            task.wait(1.9)
+            Root.Position = UDim2.fromScale(0.5, 0.5)
+            task.wait(0.9)
         end)
 
-        TweenService:Create(Root, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            GroupTransparency = 1,
-        }):Play()
+        local info = TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+        TweenService:Create(Root, info, { GroupTransparency = 1 }):Play()
+        TweenService:Create(RootScale, info, { Scale = 1.35 }):Play()
         task.wait(0.8)
 
-        if LoaderGui and LoaderGui.Parent then
-            LoaderGui:Destroy()
-        end
-
+        if LoaderGui and LoaderGui.Parent then LoaderGui:Destroy() end
         getgenv().GerixLoaderDone = true
     end)
-end
+end)
+if not okLoader then getgenv().GerixLoaderDone = true end
 
 -- ============ LOAD LIBRARY ============
 local repo = "https://raw.githubusercontent.com/majeskooooo/Obsidian/main/"
@@ -787,7 +516,7 @@ local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
--- ============ WAIT FOR LOADER 100% ============
+-- ============ WAIT FOR LOADER ============
 do
     local waitStart = tick()
     repeat
@@ -795,7 +524,7 @@ do
     until getgenv().GerixLoaderDone == true or (tick() - waitStart) > 30
 end
 
--- ============ NOW BUILD THE GUI ============
+-- ============ BUILD THE GUI ============
 local Options = Library.Options
 local Toggles = Library.Toggles
 
@@ -804,53 +533,50 @@ local player = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-Library.Scheme.AccentColor     = Color3.fromRGB(96, 165, 250)
-Library.Scheme.BackgroundColor = Color3.fromRGB(11, 15, 25)
-Library.Scheme.MainColor       = Color3.fromRGB(19, 26, 40)
-Library.Scheme.OutlineColor    = Color3.fromRGB(34, 45, 65)
-Library.Scheme.DarkColor       = Color3.fromRGB(5, 7, 12)
+Library.Scheme.AccentColor     = Color3.fromRGB(255, 59, 92)
+Library.Scheme.BackgroundColor = Color3.fromRGB(9, 9, 11)
+Library.Scheme.MainColor       = Color3.fromRGB(19, 19, 24)
+Library.Scheme.OutlineColor    = Color3.fromRGB(46, 46, 56)
+Library.Scheme.DarkColor       = Color3.fromRGB(0, 0, 0)
 
 local Window = Library:CreateWindow({
-    Title = "",
-    Footer = "Gerix Hub",
-    FooterLeft = "0.1",
+    Title = "Gerix Hub",
+    Footer = "GERIX//HUB",
+    FooterLeft = "0.3",
     FooterRight = "Made by J4ldev and Alx17",
-    Icon = 105109993228866,
-    NotifySide = "Right",
+    NotifySide = "Left",
     ShowCustomCursor = true,
-    Size = UDim2.fromOffset(720, 780),
+    Size = UDim2.fromOffset(690, 730),
     Center = true,
     Resizable = true,
-    SidebarCompacted = true,
+    SidebarCompacted = false,
     ShowMobileButtons = false,
-    CornerRadius = 12,
-    Font = Enum.Font.GothamMedium,
+    CornerRadius = 2,
+    Font = Enum.Font.Code,
 })
 
 local Tabs = {
-    Info = Window:AddTab("Info", "info", "Game info"),
-    Aimbot = Window:AddTab("Main", "crosshair", "Core features"),
-    Teleports = Window:AddTab("Weapons & Shop", "shopping-basket", "Teleports and Weapons"),
-    Visuals = Window:AddTab("Visuals", "eye", "ESP and Visual Customization"),
-    ["UI Settings"] = Window:AddTab(" Settings", "settings", "Customize the UI behavior and appearance"),
+    Info = Window:AddTab("Home", "home", "Profile and news"),
+    Aimbot = Window:AddTab("Combat", "swords", "Aim, hitbox and weapons"),
+    Teleports = Window:AddTab("Utility", "terminal", "Loadout, movement, world, teleports"),
+    Visuals = Window:AddTab("Render", "scan-eye", "ESP and tracers"),
+    ["UI Settings"] = Window:AddTab("Config", "sliders-horizontal", "Menu and saved configs"),
 }
 
-Library:SetDPIScale(95)
+Library:SetDPIScale(105)
 
 local scriptStartTime = tick()
 
 local function getGreeting()
     local hour = tonumber(os.date("%H"))
-    if hour < 12 then return "Good Morning"
-    elseif hour < 18 then return "Good Afternoon"
-    else return "Good Evening" end
+    if hour < 12 then return "Morning" elseif hour < 18 then return "Afternoon" else return "Evening" end
 end
 
 local function formatUptime(seconds)
     local h = math.floor(seconds / 3600)
     local m = math.floor((seconds % 3600) / 60)
     local s = math.floor(seconds % 60)
-    return string.format("%dh %dm %ds", h, m, s)
+    return string.format("%02d:%02d:%02d", h, m, s)
 end
 
 local InfoTabLeft = Tabs.Info.Sides[1]
@@ -858,16 +584,16 @@ local InfoTabRight = Tabs.Info.Sides[2]
 local InfoTabContainer = InfoTabLeft.Parent
 
 local PROFILE_HEIGHT = 110
-local PROFILE_GAP = 10
+local PROFILE_GAP = 8
 
 local ProfileHolder = Instance.new("Frame")
 ProfileHolder.Name = "ProfilePanel"
-ProfileHolder.BackgroundColor3 = Library.Scheme.BackgroundColor
+ProfileHolder.BackgroundColor3 = Library.Scheme.MainColor
 ProfileHolder.Position = UDim2.fromOffset(1, 2)
 ProfileHolder.Size = UDim2.new(1, -2, 0, PROFILE_HEIGHT)
 ProfileHolder.Parent = InfoTabContainer
 
-Library:AddToRegistry(ProfileHolder, { BackgroundColor3 = "BackgroundColor" })
+Library:AddToRegistry(ProfileHolder, { BackgroundColor3 = "MainColor" })
 
 local ProfileCorner = Instance.new("UICorner")
 ProfileCorner.CornerRadius = UDim.new(0, Library.CornerRadius)
@@ -876,51 +602,77 @@ table.insert(Library.Corners, ProfileCorner)
 
 Library:AddOutline(ProfileHolder)
 
+-- accent strip on the left edge of the profile card
+local ProfileStrip = Instance.new("Frame")
+ProfileStrip.Size = UDim2.new(0, 3, 1, 0)
+ProfileStrip.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ProfileStrip.BorderSizePixel = 0
+ProfileStrip.Parent = ProfileHolder
+local StripGrad = Instance.new("UIGradient")
+StripGrad.Rotation = 90
+StripGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 59, 92)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 70, 190)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 59, 92)),
+})
+StripGrad.Parent = ProfileStrip
+task.spawn(function()
+    while ProfileStrip.Parent do
+        StripGrad.Offset = Vector2.new(0, math.sin(tick() * 1.6) * 0.5)
+        task.wait(0.03)
+    end
+end)
+
 local ProfileFrame = Instance.new("Frame")
 ProfileFrame.Name = "ProfileFrame"
 ProfileFrame.BackgroundTransparency = 1
-ProfileFrame.Size = UDim2.new(1, -16, 1, -16)
-ProfileFrame.Position = UDim2.fromOffset(8, 8)
+ProfileFrame.Size = UDim2.new(1, -20, 1, -16)
+ProfileFrame.Position = UDim2.fromOffset(14, 8)
 ProfileFrame.Parent = ProfileHolder
 
 local HeadshotImage = Instance.new("ImageLabel")
 HeadshotImage.Name = "Headshot"
-HeadshotImage.BackgroundColor3 = Library:GetBetterColor(Library.Scheme.BackgroundColor, 8)
+HeadshotImage.BackgroundColor3 = Library:GetBetterColor(Library.Scheme.MainColor, 8)
 HeadshotImage.BackgroundTransparency = 0
-HeadshotImage.Size = UDim2.fromOffset(80, 80)
+HeadshotImage.Size = UDim2.fromOffset(86, 86)
 HeadshotImage.Position = UDim2.fromOffset(0, 0)
-HeadshotImage.Image = ""
+HeadshotImage.Image = ("rbxthumb://type=AvatarHeadShot&id=%d&w=150&h=150"):format(player.UserId)
+HeadshotImage.ScaleType = Enum.ScaleType.Crop
 HeadshotImage.Parent = ProfileFrame
 
 Library:AddToRegistry(HeadshotImage, {
     BackgroundColor3 = function()
-        return Library:GetBetterColor(Library.Scheme.BackgroundColor, 8)
+        return Library:GetBetterColor(Library.Scheme.MainColor, 8)
     end,
 })
 
 local HeadshotCorner = Instance.new("UICorner")
-HeadshotCorner.CornerRadius = UDim.new(0, 12)
+HeadshotCorner.CornerRadius = UDim.new(0, 2)
 HeadshotCorner.Parent = HeadshotImage
 
 task.spawn(function()
-    local ok, content = pcall(function()
-        return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-    end)
-    if ok and content then
-        HeadshotImage.Image = content
+    for _ = 1, 3 do
+        local ok, content = pcall(function()
+            return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        end)
+        if ok and content and content ~= "" then
+            HeadshotImage.Image = content
+            break
+        end
+        task.wait(1)
     end
 end)
 
 local GreetingLabel = Instance.new("TextLabel")
 GreetingLabel.Name = "GreetingLabel"
 GreetingLabel.BackgroundTransparency = 1
-GreetingLabel.Position = UDim2.fromOffset(92, 2)
-GreetingLabel.Size = UDim2.new(1, -92, 0, 26)
-GreetingLabel.Font = Enum.Font.GothamBold
-GreetingLabel.TextSize = 18
+GreetingLabel.Position = UDim2.fromOffset(100, 0)
+GreetingLabel.Size = UDim2.new(1, -100, 0, 28)
+GreetingLabel.Font = Enum.Font.Code
+GreetingLabel.TextSize = 19
 GreetingLabel.TextXAlignment = Enum.TextXAlignment.Left
 GreetingLabel.TextColor3 = Library.Scheme.FontColor
-GreetingLabel.Text = getGreeting() .. ", " .. player.Name .. "!"
+GreetingLabel.Text = "> " .. getGreeting():lower() .. ", " .. player.Name
 GreetingLabel.Parent = ProfileFrame
 
 Library:AddToRegistry(GreetingLabel, { TextColor3 = "FontColor" })
@@ -933,15 +685,15 @@ end)
 local InfoDetailsLabel = Instance.new("TextLabel")
 InfoDetailsLabel.Name = "InfoDetailsLabel"
 InfoDetailsLabel.BackgroundTransparency = 1
-InfoDetailsLabel.Position = UDim2.fromOffset(92, 30)
-InfoDetailsLabel.Size = UDim2.new(1, -92, 0, 60)
-InfoDetailsLabel.Font = Enum.Font.Gotham
-InfoDetailsLabel.TextSize = 13
+InfoDetailsLabel.Position = UDim2.fromOffset(100, 32)
+InfoDetailsLabel.Size = UDim2.new(1, -100, 0, 54)
+InfoDetailsLabel.Font = Enum.Font.Code
+InfoDetailsLabel.TextSize = 14
 InfoDetailsLabel.TextXAlignment = Enum.TextXAlignment.Left
 InfoDetailsLabel.TextYAlignment = Enum.TextYAlignment.Top
-InfoDetailsLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoDetailsLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
 InfoDetailsLabel.RichText = true
-InfoDetailsLabel.Text = "• Executor: " .. ExecutorName .. "\n• Map: Prison Life\n• Time: " .. os.date("%I:%M %p")
+InfoDetailsLabel.Text = "exec  : " .. ExecutorName .. "\nmap   : Prison Life\ntime  : " .. os.date("%I:%M %p")
 InfoDetailsLabel.Parent = ProfileFrame
 
 local function RepositionInfoSides()
@@ -954,22 +706,22 @@ end
 RepositionInfoSides()
 function Tabs.Info:RefreshSides() RepositionInfoSides() end
 
-local UpdatesBox = Tabs.Info:AddLeftGroupbox("Updates", "bell")
-UpdatesBox:AddLabel("Prison Life", true)
-UpdatesBox:AddLabel("- Nothing yet\n- \n- ", true)
-UpdatesBox:AddDivider("Info")
+local UpdatesBox = Tabs.Info:AddLeftGroupbox("Changelog", "scroll-text")
+UpdatesBox:AddLabel("Prison Life // v0.3", true)
+UpdatesBox:AddLabel("- Cyber loader with matrix rain\n- Live watermark HUD\n- Animated accents", true)
+UpdatesBox:AddDivider("Links")
 UpdatesBox:AddButton({
-    Text = "Discord Server",
+    Text = "Copy Discord Invite",
     Func = function()
         pcall(function() setclipboard("https://discord.gg/ez4YUk2Qc") end)
     end,
 })
 
-local FeedbackBox = Tabs.Info:AddRightGroupbox("Feedback System", "mail")
-FeedbackBox:SetDescription("Send feedback to developer")
-FeedbackBox:AddLabel("Your feedback")
+local FeedbackBox = Tabs.Info:AddRightGroupbox("Feedback", "message-square")
+FeedbackBox:SetDescription("Tell the developers what to fix")
+FeedbackBox:AddLabel("Message")
 FeedbackBox:AddInput("FeedbackText", {
-    Text = "", Placeholder = "Type your feedback here",
+    Text = "", Placeholder = "Type here",
     ClearTextOnFocus = false, Finished = false,
 })
 do
@@ -989,20 +741,20 @@ do
     end
 end
 FeedbackBox:AddButton({
-    Text = "Send Feedback",
+    Text = "Send",
     Func = function() getgenv().SendFeedback(Options.FeedbackText.Value) end,
 })
 
-local ServerStatsBox = Tabs.Info:AddRightGroupbox("Server Stats", "info")
+local ServerStatsBox = Tabs.Info:AddRightGroupbox("Session", "activity")
 local regionCode = "Unknown"
 pcall(function()
     regionCode = game:GetService("LocalizationService"):GetCountryRegionForPlayerAsync(player)
 end)
-local ServerStatsLabel = ServerStatsBox:AddLabel("Region: " .. regionCode .. "\nCountry: " .. regionCode .. "\nUptime: " .. formatUptime(tick() - scriptStartTime), true)
+local ServerStatsLabel = ServerStatsBox:AddLabel("region : " .. regionCode .. "\nuptime : " .. formatUptime(tick() - scriptStartTime), true)
 task.spawn(function()
     while task.wait(1) do
         pcall(function()
-            ServerStatsLabel:SetText("Region: " .. regionCode .. "\nCountry: " .. regionCode .. "\nUptime: " .. formatUptime(tick() - scriptStartTime))
+            ServerStatsLabel:SetText("region : " .. regionCode .. "\nuptime : " .. formatUptime(tick() - scriptStartTime))
         end)
     end
 end)
@@ -1069,11 +821,11 @@ if Library.IsMobile then
     end)
 end
 
--- ============ GET WEAPONS ============
-local GetWeaponsBox = Tabs.Teleports:AddLeftGroupbox("Get Weapons", "sword")
+-- ============ UTILITY TAB: LOADOUT ============
+local GetWeaponsBox = Tabs.Teleports:AddLeftGroupbox("Loadout", "package")
 GetWeaponsBox:AddDropdown("GetWeaponsList", {
     Values = {"MP5", "AK-47", "M4A1", "FAL", "Remington 870", "M700"},
-    Multi = true, Text = "Select Weapons to Get",
+    Multi = true, Text = "Weapons",
     Tooltip = "Choose which weapons you want to receive",
     Callback = function(Value)
         local list = {}
@@ -1084,33 +836,33 @@ GetWeaponsBox:AddDropdown("GetWeaponsList", {
     end,
 })
 GetWeaponsBox:AddButton({
-    Text = "Get Weapons",
+    Text = "Equip Selected",
     Func = function()
         if getgenv().GetWeapons then getgenv().GetWeapons() end
     end,
 })
 GetWeaponsBox:AddDivider()
 GetWeaponsBox:AddCheckbox("AutoGetWeapons", {
-    Text = "Auto get Weapons", Default = false,
+    Text = "Auto equip on respawn", Default = false,
     Callback = function(v) getgenv().SilentAimSettings.AutoGetWeapons = v end,
 })
 
--- ============ MISC ============
-local PlayerSettingsBox = Tabs.Teleports:AddLeftGroupbox("Misc", "sliders")
-PlayerSettingsBox:AddCheckbox("Noclip", { Text = "Noclip", Tooltip = "Allows you to walk through walls and objects", Default = false, Callback = function(v) getgenv().SetNoclipEnabled(v) end })
-PlayerSettingsBox:AddCheckbox("InfiniteJump", { Text = "Infinite Jump", Tooltip = "Allows you to jump infinitely in the air", Default = false, Callback = function(v) getgenv().SetInfiniteJumpEnabled(v) end })
-PlayerSettingsBox:AddCheckbox("InfiniteStamina", { Text = "Infinite Stamina", Tooltip = "Disables the jump cooldown", Default = false, Callback = function(v) getgenv().SilentAimSettings.InfiniteStamina = v end })
+-- ============ UTILITY TAB: PLAYER ============
+local PlayerSettingsBox = Tabs.Teleports:AddLeftGroupbox("Player", "user")
+PlayerSettingsBox:AddCheckbox("Noclip", { Text = "Noclip", Tooltip = "Walk through walls and objects", Default = false, Callback = function(v) getgenv().SetNoclipEnabled(v) end })
+PlayerSettingsBox:AddCheckbox("InfiniteJump", { Text = "Infinite Jump", Tooltip = "Jump infinitely in the air", Default = false, Callback = function(v) getgenv().SetInfiniteJumpEnabled(v) end })
+PlayerSettingsBox:AddCheckbox("InfiniteStamina", { Text = "No Jump Cooldown", Tooltip = "Disables the jump cooldown", Default = false, Callback = function(v) getgenv().SilentAimSettings.InfiniteStamina = v end })
 PlayerSettingsBox:AddCheckbox("Invisible", { Text = "Invisible", Default = false, Callback = function(v) getgenv().SetInvisibleEnabled(v) end })
 PlayerSettingsBox:AddCheckbox("AntiInvisible", { Text = "Anti-Invisible", Default = false, Callback = function(v) getgenv().SetAntiInvisibleEnabled(v) end })
 PlayerSettingsBox:AddCheckbox("Korblox", { Text = "Korblox", Default = false, Callback = function(v) getgenv().SetKorbloxEnabled(v) end })
 PlayerSettingsBox:AddCheckbox("Headless", { Text = "Headless", Default = false, Callback = function(v) getgenv().SetHeadlessEnabled(v) end })
 PlayerSettingsBox:AddCheckbox("AntiSit", { Text = "Anti Sit", Tooltip = "Prevents sitting on seats", Default = false, Callback = function(v) getgenv().SetAntiSitEnabled(v) end })
-PlayerSettingsBox:AddCheckbox("CameraFOVEnabled", { Text = "Enable Camera FOV", Default = false, Callback = function(v) getgenv().SilentAimSettings.CameraFOVEnabled = v end })
+PlayerSettingsBox:AddCheckbox("CameraFOVEnabled", { Text = "Custom Camera FOV", Default = false, Callback = function(v) getgenv().SilentAimSettings.CameraFOVEnabled = v end })
 PlayerSettingsBox:AddSlider("CameraFOV", { Text = "Camera FOV", Default = 70, Min = 30, Max = 120, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.CameraFOV = Value; workspace.CurrentCamera.FieldOfView = Value end })
-PlayerSettingsBox:AddSlider("SpinbotSpeed", { Text = "Spinbot", Default = 0, Min = 0, Max = 250, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.SpinbotSpeed = Value end })
+PlayerSettingsBox:AddSlider("SpinbotSpeed", { Text = "Spin Speed", Default = 0, Min = 0, Max = 250, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.SpinbotSpeed = Value end })
 PlayerSettingsBox:AddDivider()
 PlayerSettingsBox:AddButton({
-    Text = "Activate Anti-Tase",
+    Text = "Enable Anti-Tase",
     Func = function()
         local RS = game:GetService("ReplicatedStorage")
         local remote
@@ -1124,16 +876,16 @@ PlayerSettingsBox:AddButton({
                 task.wait(0.5)
             end
         end)
-        Library:Notify({ Title = "Anti-Tase", Text = "Anti-Tase enabled️" })
+        Library:Notify({ Title = "Anti-Tase", Text = "Anti-Tase enabled" })
     end,
 })
 
--- ============ ENVIRONMENT ============
-local EnvironmentBox = Tabs.Teleports:AddLeftGroupbox("Environment", "trees")
-EnvironmentBox:AddLabel("World appearance settings", true)
+-- ============ UTILITY TAB: WORLD ============
+local EnvironmentBox = Tabs.Teleports:AddLeftGroupbox("World", "globe")
+EnvironmentBox:AddLabel("Lighting, fog and sky", true)
 local EnvironmentTabbox = EnvironmentBox:AddTabbox()
-local EnvironmentNetworkTab = EnvironmentTabbox:AddTab(nil, "globe")
-local EnvironmentCloudTab = EnvironmentTabbox:AddTab(nil, "cloud")
+local EnvironmentNetworkTab = EnvironmentTabbox:AddTab(nil, "sun")
+local EnvironmentCloudTab = EnvironmentTabbox:AddTab(nil, "cloud-moon")
 
 local WorldGradientEnabled = false
 local DefaultAmbient = game:GetService("Lighting").Ambient
@@ -1141,7 +893,7 @@ local DefaultOutdoorAmbient = game:GetService("Lighting").OutdoorAmbient
 local CurrentGradientColor = Color3.fromRGB(255, 255, 255)
 local CurrentOutdoorGradient = Color3.fromRGB(255, 255, 255)
 
-EnvironmentNetworkTab:AddCheckbox("WorldGradient", { Text = "World Gradient", Default = false, Callback = function(v)
+EnvironmentNetworkTab:AddCheckbox("WorldGradient", { Text = "World Tint", Default = false, Callback = function(v)
     WorldGradientEnabled = v
     if v then
         game:GetService("Lighting").Ambient = CurrentGradientColor
@@ -1151,8 +903,8 @@ EnvironmentNetworkTab:AddCheckbox("WorldGradient", { Text = "World Gradient", De
         game:GetService("Lighting").OutdoorAmbient = DefaultOutdoorAmbient
     end
 end })
-EnvironmentNetworkTab:AddLabel("Gradient Color"):AddColorPicker("GradientColor", { Default = Color3.fromRGB(255,255,255), Title = "Gradient Color", Text = "Gradient Color", Callback = function(Value) CurrentGradientColor = Value; if WorldGradientEnabled then game:GetService("Lighting").Ambient = Value end end })
-EnvironmentNetworkTab:AddLabel("Outdoor Gradient"):AddColorPicker("OutdoorGradient", { Default = Color3.fromRGB(255,255,255), Title = "Outdoor Gradient", Text = "Outdoor Gradient", Callback = function(Value) CurrentOutdoorGradient = Value; if WorldGradientEnabled then game:GetService("Lighting").OutdoorAmbient = Value end end })
+EnvironmentNetworkTab:AddLabel("Ambient"):AddColorPicker("GradientColor", { Default = Color3.fromRGB(255,255,255), Title = "Ambient", Text = "Ambient", Callback = function(Value) CurrentGradientColor = Value; if WorldGradientEnabled then game:GetService("Lighting").Ambient = Value end end })
+EnvironmentNetworkTab:AddLabel("Outdoor"):AddColorPicker("OutdoorGradient", { Default = Color3.fromRGB(255,255,255), Title = "Outdoor", Text = "Outdoor", Callback = function(Value) CurrentOutdoorGradient = Value; if WorldGradientEnabled then game:GetService("Lighting").OutdoorAmbient = Value end end })
 EnvironmentNetworkTab:AddDivider()
 EnvironmentNetworkTab:AddCheckbox("RemoveFog", { Text = "Remove Fog", Default = false, Callback = function(v)
     if v then
@@ -1172,7 +924,7 @@ EnvironmentCloudTab:AddCheckbox("CustomSkybox", { Text = "Custom Skybox", Defaul
 end })
 EnvironmentCloudTab:AddDropdown("Skyboxes", {
     Values = {"None", "Gray Skybox", "2knw & Donk666 Skybox", "Snow Skybox", "Cartoon Skybox", "Lince Skybox", "Red Skybox", "Slam Skybox", "Green Eyeball Skybox", "Morioh Skybox", "Rainy Skybox", "Rusk1ddski Skybox"},
-    Default = "None", Text = "Skyboxes", Callback = function(Value)
+    Default = "None", Text = "Skybox", Callback = function(Value)
         CurrentSkybox = Value
         if CustomSkyboxEnabled then setSkybox(Value) end
     end,
@@ -1209,8 +961,8 @@ local function startSpectate(targetName)
     end)
 end
 
--- ============ AIMBOT ============
-local AimbotLeftBox = Tabs.Aimbot:AddLeftGroupbox("Aim Settings", "crosshair")
+-- ============ COMBAT TAB: AIM ============
+local AimbotLeftBox = Tabs.Aimbot:AddLeftGroupbox("Targeting", "crosshair")
 AimbotLeftBox:AddCheckbox("SilentAim", { Text = "Silent Aim", Default = true, Callback = function(v) getgenv().SilentAimSettings.Enabled = v end })
 AimbotLeftBox:AddCheckbox("Autoshoot", { Text = "Autoshoot", Default = false, Callback = function(v) getgenv().SilentAimSettings.Autoshoot = v end })
 AimbotLeftBox:AddCheckbox("WallCheck", { Text = "Wall Check", Default = true, Callback = function(v) getgenv().SilentAimSettings.VisibleCheck = v end })
@@ -1218,14 +970,14 @@ AimbotLeftBox:AddCheckbox("TeamCheck", { Text = "Team Check", Default = true, Ca
 AimbotLeftBox:AddCheckbox("FriendCheck", { Text = "Friend Check", Default = true, Callback = function(v) getgenv().SilentAimSettings.FriendCheck = v end })
 AimbotLeftBox:AddCheckbox("ForceFieldCheck", { Text = "ForceField Check", Default = true, Callback = function(v) getgenv().SilentAimSettings.ForceFieldCheck = v end })
 
-local AutoshootWarningLabel = AimbotLeftBox:AddLabel("Note: Autoshot is not compatible with Hitchance", true)
+local AutoshootWarningLabel = AimbotLeftBox:AddLabel("Note: Autoshoot does not work with Hit Chance", true)
 do
     local w = AutoshootWarningLabel.Holder and AutoshootWarningLabel.Holder:FindFirstChildOfClass("TextLabel")
-    if w then w.TextColor3 = Color3.fromRGB(255, 70, 70) end
+    if w then w.TextColor3 = Color3.fromRGB(255, 120, 60) end
 end
 AimbotLeftBox:AddDivider()
 AimbotLeftBox:AddDropdown("TargetTeams", {
-    Values = {"Inmates", "Guards", "Criminals"}, Multi = true, Text = "Target Teams",
+    Values = {"Inmates", "Guards", "Criminals"}, Multi = true, Text = "Teams",
     Callback = function(Value) getgenv().SilentAimSettings.TargetTeams = Value or {} end,
 })
 Options.TargetTeams:SetValue({ Inmates = true, Guards = true, Criminals = true })
@@ -1234,7 +986,7 @@ local lastTargetModeSelection = { ["Manual"] = true }
 local updateInProgress = false
 AimbotLeftBox:AddDropdown("TargetMode", {
     Values = {"Manual", "🔗 Trespass", "💢 Hostile"}, Multi = true, Default = { ["Manual"] = true },
-    Text = "Target Mode", Callback = function(Value)
+    Text = "Mode", Callback = function(Value)
         if updateInProgress then return end
         updateInProgress = true
         task.defer(function()
@@ -1262,54 +1014,54 @@ local targetOptions = {}
 for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then table.insert(targetOptions, plr.Name) end end
 
 AimbotLeftBox:AddDropdown("AimMode", {
-    Values = {"FOV", "Distance"}, Default = "FOV", Text = "Targeting Mode",
+    Values = {"FOV", "Distance"}, Default = "FOV", Text = "Sort By",
     Callback = function(Value) getgenv().SilentAimSettings.AimMode = Value end,
 })
 AimbotLeftBox:AddDropdown("TargetPart", {
     Values = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg", "HumanoidRootPart", "Random"},
-    Default = "HumanoidRootPart", Text = "Target Part",
+    Default = "HumanoidRootPart", Text = "Hit Part",
     Callback = function(Value) getgenv().SilentAimSettings.TargetPart = Value end,
 })
 
-local HitboxExpanderBox = Tabs.Aimbot:AddLeftGroupbox("Hitbox Expander", "maximize-2")
+local HitboxExpanderBox = Tabs.Aimbot:AddLeftGroupbox("Hitbox", "box")
 HitboxExpanderBox:SetDescription("Enlarges player hitboxes")
-HitboxExpanderBox:AddCheckbox("EnableHitboxExpander", { Text = "Enable Hitbox Expander", Default = false, Callback = function(v) getgenv().SilentAimSettings.HitboxExpanderEnabled = v end })
+HitboxExpanderBox:AddCheckbox("EnableHitboxExpander", { Text = "Enable", Default = false, Callback = function(v) getgenv().SilentAimSettings.HitboxExpanderEnabled = v end })
 HitboxExpanderBox:AddCheckbox("HitboxTeamCheck", { Text = "Team Check", Default = true, Callback = function(v) getgenv().SilentAimSettings.HitboxTeamCheck = v end })
-HitboxExpanderBox:AddSlider("HitboxSize", { Text = "Hitbox Size", Default = 1, Min = 1, Max = 15, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.HitboxSize = Value end })
-HitboxExpanderBox:AddSlider("HitboxTransparency", { Text = "Hitbox Transparency", Default = 0.5, Min = 0, Max = 1, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.HitboxTransparency = Value end })
-HitboxExpanderBox:AddDropdown("HitboxShape", { Values = {"Box", "Ball"}, Default = "Box", Text = "Hitbox Shape", Callback = function(Value) getgenv().SilentAimSettings.HitboxShape = Value end })
+HitboxExpanderBox:AddSlider("HitboxSize", { Text = "Size", Default = 1, Min = 1, Max = 15, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.HitboxSize = Value end })
+HitboxExpanderBox:AddSlider("HitboxTransparency", { Text = "Transparency", Default = 0.5, Min = 0, Max = 1, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.HitboxTransparency = Value end })
+HitboxExpanderBox:AddDropdown("HitboxShape", { Values = {"Box", "Ball"}, Default = "Box", Text = "Shape", Callback = function(Value) getgenv().SilentAimSettings.HitboxShape = Value end })
 
-local AimbotMidBox = Tabs.Aimbot:AddLeftGroupbox("Smoothing & Accuracy", "target")
-AimbotMidBox:AddSlider("SilentAimRange", { Text = "Silent Aim Range", Default = 500, Min = 30, Max = 2000, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.SilentAimRange = Value end })
+local AimbotMidBox = Tabs.Aimbot:AddLeftGroupbox("Precision", "target")
+AimbotMidBox:AddSlider("SilentAimRange", { Text = "Range", Default = 500, Min = 30, Max = 2000, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.SilentAimRange = Value end })
 AimbotMidBox:AddSlider("Smoothing", { Text = "Smoothing", Default = 0, Min = 0, Max = 1, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.Smoothing = Value end })
 AimbotMidBox:AddSlider("HitChance", { Text = "Hit Chance", Default = 100, Min = 0, Max = 100, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.HitChance = Value end })
 
-local FOVBox = Tabs.Aimbot:AddRightGroupbox("Settings", "settings")
+local FOVBox = Tabs.Aimbot:AddRightGroupbox("FOV & Players", "circle-dot")
 local FOVIconTabbox = FOVBox:AddTabbox()
-local FOVEyeTab = FOVIconTabbox:AddTab(nil, "scan-eye")
-local FOVUsersTab = FOVIconTabbox:AddTab(nil, "users")
+local FOVEyeTab = FOVIconTabbox:AddTab(nil, "scan")
+local FOVUsersTab = FOVIconTabbox:AddTab(nil, "users-round")
 
 FOVEyeTab:AddCheckbox("HideFOV", { Text = "Show FOV Circle", Default = true, Callback = function(v) toggleFOVCircle(not v) end }):AddColorPicker("FOVColor", { Default = Color3.fromRGB(255,255,255), Title = "FOV Color", Text = "FOV Color", Callback = function(Value) setFOVColorRGB(Value) end })
-FOVEyeTab:AddSlider("FOVSize", { Text = "FOV Circle Radius", Default = 100, Min = 30, Max = 500, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.FOVRadius = Value end })
+FOVEyeTab:AddSlider("FOVSize", { Text = "FOV Radius", Default = 100, Min = 30, Max = 500, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.FOVRadius = Value end })
 
-FOVUsersTab:AddDropdown("TargetOn", { Values = targetOptions, Default = 1, Text = "Target On", Multi = true, AllowNull = true, Callback = function(Value)
+FOVUsersTab:AddDropdown("TargetOn", { Values = targetOptions, Default = 1, Text = "Only Target", Multi = true, AllowNull = true, Callback = function(Value)
     local list = {}
     for name, selected in pairs(Value or {}) do if selected then table.insert(list, name) end end
     getgenv().SilentAimSettings.TargetOnPlayer = list
 end })
-FOVUsersTab:AddButton({ Text = "Reset Target", Func = function()
+FOVUsersTab:AddButton({ Text = "Clear Target", Func = function()
     getgenv().SilentAimSettings.TargetOnPlayer = {}
     local newOptions = {}
     for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then table.insert(newOptions, plr.Name) end end
     Options.TargetOn:SetValues(newOptions)
     Options.TargetOn:SetValue({})
 end })
-FOVUsersTab:AddDropdown("IgnoreTarget", { Values = targetOptions, Default = 1, Text = "Ignore Target", Multi = true, AllowNull = true, Callback = function(Value)
+FOVUsersTab:AddDropdown("IgnoreTarget", { Values = targetOptions, Default = 1, Text = "Ignore", Multi = true, AllowNull = true, Callback = function(Value)
     local list = {}
     for name, selected in pairs(Value or {}) do if selected then table.insert(list, name) end end
     getgenv().SilentAimSettings.IgnoreTargets = list
 end })
-FOVUsersTab:AddButton({ Text = "Reset Ignore List", Func = function()
+FOVUsersTab:AddButton({ Text = "Clear Ignore List", Func = function()
     getgenv().SilentAimSettings.IgnoreTargets = {}
     local newOptions = {}
     for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then table.insert(newOptions, plr.Name) end end
@@ -1318,16 +1070,16 @@ FOVUsersTab:AddButton({ Text = "Reset Ignore List", Func = function()
 end })
 
 -- ============ FAST SWITCH BUTTON ============
-local FastSwitchOnColor = Color3.fromRGB(150, 199, 150)
+local FastSwitchOnColor = Color3.fromRGB(255, 59, 92)
 local FastSwitchButton = Instance.new("TextButton")
 FastSwitchButton.Name = "FastSwitchButton"
 FastSwitchButton.AutoButtonColor = false
 FastSwitchButton.BackgroundColor3 = Library.Scheme.MainColor
 FastSwitchButton.Position = UDim2.fromOffset(6, 52)
 FastSwitchButton.Size = UDim2.fromOffset(130, 32)
-FastSwitchButton.Text = "Fast Switch: OFF"
+FastSwitchButton.Text = "SWITCH [OFF]"
 FastSwitchButton.TextColor3 = Library.Scheme.FontColor
-FastSwitchButton.Font = Enum.Font.Gotham
+FastSwitchButton.Font = Enum.Font.Code
 FastSwitchButton.TextSize = 14
 FastSwitchButton.ZIndex = 10
 FastSwitchButton.Visible = false
@@ -1343,7 +1095,7 @@ if not table.find(Library.DraggableElements, FastSwitchButton) then table.insert
 
 local function updateFastSwitchButtonVisual()
     local enabled = getgenv().SilentAimSettings.GunSwitchEnabled
-    FastSwitchButton.Text = enabled and "Fast Switch: ON" or "Fast Switch: OFF"
+    FastSwitchButton.Text = enabled and "SWITCH [ON]" or "SWITCH [OFF]"
     if enabled then
         FastSwitchButton.BackgroundColor3 = FastSwitchOnColor
         Library:AddToRegistry(FastSwitchButton, { TextColor3 = "FontColor" })
@@ -1397,16 +1149,16 @@ FastSwitchButton.InputBegan:Connect(function(Input)
 end)
 
 -- ============ VEHICLE FLY BUTTON ============
-local VehicleFlyOnColor = Color3.fromRGB(150, 199, 150)
+local VehicleFlyOnColor = Color3.fromRGB(255, 59, 92)
 local VehicleFlyButton = Instance.new("TextButton")
 VehicleFlyButton.Name = "VehicleFlyButton"
 VehicleFlyButton.AutoButtonColor = false
 VehicleFlyButton.BackgroundColor3 = Library.Scheme.MainColor
 VehicleFlyButton.Position = UDim2.fromOffset(6, 90)
 VehicleFlyButton.Size = UDim2.fromOffset(130, 32)
-VehicleFlyButton.Text = "Vehicle Fly: OFF"
+VehicleFlyButton.Text = "FLY [OFF]"
 VehicleFlyButton.TextColor3 = Library.Scheme.FontColor
-VehicleFlyButton.Font = Enum.Font.Gotham
+VehicleFlyButton.Font = Enum.Font.Code
 VehicleFlyButton.TextSize = 14
 VehicleFlyButton.ZIndex = 10
 VehicleFlyButton.Visible = false
@@ -1422,7 +1174,7 @@ if not table.find(Library.DraggableElements, VehicleFlyButton) then table.insert
 
 local function updateVehicleFlyButtonVisual()
     local enabled = getgenv().SilentAimSettings.VehicleFlyEnabled
-    VehicleFlyButton.Text = enabled and "Vehicle Fly: ON" or "Vehicle Fly: OFF"
+    VehicleFlyButton.Text = enabled and "FLY [ON]" or "FLY [OFF]"
     if enabled then
         VehicleFlyButton.BackgroundColor3 = VehicleFlyOnColor
         Library:AddToRegistry(VehicleFlyButton, { TextColor3 = "FontColor" })
@@ -1467,30 +1219,30 @@ local function setVehicleFlyLocked(locked)
     end
 end
 
--- ============ GUN SWITCHER ============
-local GunSwitcherBox = Tabs.Aimbot:AddRightGroupbox("Gun Switcher", "repeat")
+-- ============ COMBAT TAB: GUN SWITCHER ============
+local GunSwitcherBox = Tabs.Aimbot:AddRightGroupbox("Quick Switch", "repeat-2")
 GunSwitcherBox:AddDropdown("SelectGunsToSwitch", {
     Values = {"M9", "Revolver", "MP5", "AK-47", "M4A1", "FAL", "Remington 870", "M700"},
-    Multi = true, Text = "Select Guns to Switch",
+    Multi = true, Text = "Guns",
     Callback = function(Value)
         local list = {}
         for name, selected in pairs(Value or {}) do if selected then table.insert(list, name) end end
         getgenv().SilentAimSettings.GunSwitchList = list
     end,
 })
-GunSwitcherBox:AddSlider("SwitchDelay", { Text = "Switch Delay", Default = 0.001, Min = 0.001, Max = 1, Rounding = 2, Callback = function(Value) getgenv().SilentAimSettings.GunSwitchDelay = Value end })
+GunSwitcherBox:AddSlider("SwitchDelay", { Text = "Delay", Default = 0.001, Min = 0.001, Max = 1, Rounding = 2, Callback = function(Value) getgenv().SilentAimSettings.GunSwitchDelay = Value end })
 GunSwitcherBox:AddDivider()
-GunSwitcherBox:AddCheckbox("ShowGunSwitchButton", { Text = "Show Fast Switch Button", Default = false, Callback = function(v) FastSwitchButton.Visible = v end })
-GunSwitcherBox:AddCheckbox("LockFastSwitchButton", { Text = "Lock Fast Switch Button", Default = false, Callback = function(v) setFastSwitchLocked(v) end })
-GunSwitcherBox:AddCheckbox("HoldFastSwitchButton", { Text = "Hold Fast Switch Button to Enable", Default = false, Callback = function(v)
+GunSwitcherBox:AddCheckbox("ShowGunSwitchButton", { Text = "Show on-screen button", Default = false, Callback = function(v) FastSwitchButton.Visible = v end })
+GunSwitcherBox:AddCheckbox("LockFastSwitchButton", { Text = "Lock button position", Default = false, Callback = function(v) setFastSwitchLocked(v) end })
+GunSwitcherBox:AddCheckbox("HoldFastSwitchButton", { Text = "Hold to enable", Default = false, Callback = function(v)
     FastSwitchHoldMode = v
     if getgenv().SilentAimSettings.GunSwitchEnabled then
         getgenv().ToggleGunSwitch(false); updateFastSwitchButtonVisual()
     end
 end })
-GunSwitcherBox:AddCheckbox("CycleAllWeapons", { Text = "Cycle All Weapons", Default = false, Callback = function(v) getgenv().SilentAimSettings.GunSwitchCycleAll = v end })
-GunSwitcherBox:AddLabel("Fast Switch Keybind"):AddKeyPicker("FastSwitchKeybind", {
-    Default = "None", NoUI = false, Text = "Fast Switch Keybind",
+GunSwitcherBox:AddCheckbox("CycleAllWeapons", { Text = "Cycle all weapons", Default = false, Callback = function(v) getgenv().SilentAimSettings.GunSwitchCycleAll = v end })
+GunSwitcherBox:AddLabel("Keybind"):AddKeyPicker("FastSwitchKeybind", {
+    Default = "None", NoUI = false, Text = "Quick Switch",
     Callback = function()
         getgenv().ToggleGunSwitch(not getgenv().SilentAimSettings.GunSwitchEnabled)
         updateFastSwitchButtonVisual()
@@ -1503,71 +1255,71 @@ task.spawn(function()
     end
 end)
 
--- ============ WEAPON MOD ============
-local WeaponModBox = Tabs.Aimbot:AddRightGroupbox("Weapon Mod", "sword")
+-- ============ COMBAT TAB: WEAPON MOD ============
+local WeaponModBox = Tabs.Aimbot:AddRightGroupbox("Weapon", "wrench")
 local WeaponModsTabbox = WeaponModBox:AddTabbox()
 
-local GunModTab = WeaponModsTabbox:AddTab(nil, "wrench")
-GunModTab:AddCheckbox("WeaponMod", { Text = "Weapon Mod", Default = false, Callback = function(v) getgenv().SetGunModEnabled(v) end })
+local GunModTab = WeaponModsTabbox:AddTab(nil, "settings-2")
+GunModTab:AddCheckbox("WeaponMod", { Text = "Enable Mods", Default = false, Callback = function(v) getgenv().SetGunModEnabled(v) end })
 GunModTab:AddDivider()
 GunModTab:AddCheckbox("AutoFire", { Text = "Auto Fire", Default = false, Callback = function(v) getgenv().SetGunModAutoFire(v) end })
 GunModTab:AddCheckbox("FastFirerate", { Text = "Fast Firerate", Default = false, Callback = function(v) getgenv().SetGunModFastFirerate(v) end })
 GunModTab:AddCheckbox("AutoReload", { Text = "Auto Reload", Default = false, Callback = function(v) getgenv().SetAutoReloadEnabled(v) end })
-GunModTab:AddDivider("Custom Values")
+GunModTab:AddDivider("Values")
 GunModTab:AddSlider("FireRateValue", { Text = "Fire Rate", Default = 0.001, Min = 0.001, Max = 0.1, Rounding = 2, Callback = function(Value) getgenv().SetGunModFireRate(Value) end })
 
-local ChainTab = WeaponModsTabbox:AddTab(nil, "cable")
+local ChainTab = WeaponModsTabbox:AddTab(nil, "zap")
 ChainTab:AddCheckbox("CustomBulletColor", { Text = "Custom Bullet Color", Default = false, Callback = function(v) setCustomBulletColorEnabled(v) end })
 ChainTab:AddDivider()
-ChainTab:AddLabel("Bullet Color"):AddColorPicker("BulletColor", { Default = Color3.fromRGB(255,255,0), Title = "Bullet Color", Text = "Bullet Color", Callback = function(Value) setBulletColorRGB(Value) end })
+ChainTab:AddLabel("Color"):AddColorPicker("BulletColor", { Default = Color3.fromRGB(255,255,0), Title = "Bullet Color", Text = "Bullet Color", Callback = function(Value) setBulletColorRGB(Value) end })
 
-local PaintTab = WeaponModsTabbox:AddTab(nil, "paintbrush")
-PaintTab:AddCheckbox("EnableWeaponColor", { Text = "Enable Weapon Color", Default = false, Callback = function(v) getgenv().SetWeaponColorEnabled(v) end }):AddColorPicker("WeaponColor", { Default = Color3.fromRGB(255,255,255), Title = "Weapon Color", Text = "Weapon Color", Callback = function(Value) getgenv().SetWeaponColorRGB(Value) end })
-PaintTab:AddCheckbox("EnableWeaponTexture", { Text = "Enable Weapon Texture", Default = false, Callback = function(v) getgenv().SetWeaponTextureEnabled(v) end })
+local PaintTab = WeaponModsTabbox:AddTab(nil, "brush")
+PaintTab:AddCheckbox("EnableWeaponColor", { Text = "Weapon Color", Default = false, Callback = function(v) getgenv().SetWeaponColorEnabled(v) end }):AddColorPicker("WeaponColor", { Default = Color3.fromRGB(255,255,255), Title = "Weapon Color", Text = "Weapon Color", Callback = function(Value) getgenv().SetWeaponColorRGB(Value) end })
+PaintTab:AddCheckbox("EnableWeaponTexture", { Text = "Weapon Texture", Default = false, Callback = function(v) getgenv().SetWeaponTextureEnabled(v) end })
 PaintTab:AddDivider()
-PaintTab:AddSlider("WeaponTransparency", { Text = "Weapon Transparency", Default = 0, Min = 0, Max = 1, Rounding = 1, Callback = function(Value) getgenv().SetWeaponTransparency(Value) end })
-PaintTab:AddDropdown("WeaponMaterial", { Values = {"ForceField", "SmoothPlastic", "DiamondPlate", "Metal", "Marble", "Neon"}, Default = "SmoothPlastic", Text = "Weapon Material", Callback = function(Value) getgenv().SetWeaponMaterial(Value) end })
+PaintTab:AddSlider("WeaponTransparency", { Text = "Transparency", Default = 0, Min = 0, Max = 1, Rounding = 1, Callback = function(Value) getgenv().SetWeaponTransparency(Value) end })
+PaintTab:AddDropdown("WeaponMaterial", { Values = {"ForceField", "SmoothPlastic", "DiamondPlate", "Metal", "Marble", "Neon"}, Default = "SmoothPlastic", Text = "Material", Callback = function(Value) getgenv().SetWeaponMaterial(Value) end })
 PaintTab:AddDropdown("WeaponTexture", {
     Values = {"Matrix", "Blue Void", "Classic blue White", "Green and Black", "White", "Blue sky's with White Guns", "Water Skin", "Aurora", "Epic White", "Pink White", "Blue Stars"},
-    Default = "Matrix", Text = "Weapon Texture", Callback = function(Value) getgenv().SetWeaponTexture(Value) end,
+    Default = "Matrix", Text = "Texture", Callback = function(Value) getgenv().SetWeaponTexture(Value) end,
 })
 PaintTab:AddLabel("Credits to OnlyAdrian", true)
 
 local SoundTab = WeaponModsTabbox:AddTab(nil, "volume-2")
-local NotifyTab = WeaponModsTabbox:AddTab(nil, "bell")
-SoundTab:AddDropdown("WeaponSoundPack", { Values = {"None", "Silenced Shot", "Bubble Shot", "Laser Shot", "Dart Gun", "Energy Shot", "Neverlose"}, Default = "None", Text = "Custom Shot Sound", Callback = function(Value) getgenv().SetWeaponSoundPack(Value) end })
+local NotifyTab = WeaponModsTabbox:AddTab(nil, "bell-ring")
+SoundTab:AddDropdown("WeaponSoundPack", { Values = {"None", "Silenced Shot", "Bubble Shot", "Laser Shot", "Dart Gun", "Energy Shot", "Neverlose"}, Default = "None", Text = "Shot Sound", Callback = function(Value) getgenv().SetWeaponSoundPack(Value) end })
 SoundTab:AddDivider()
-SoundTab:AddCheckbox("CustomKillSound", { Text = "Custom Kill Sound", Default = false, Callback = function(v) getgenv().SetCustomKillSoundEnabled(v) end })
-SoundTab:AddCheckbox("CustomHitSound", { Text = "Custom Hit Sound", Default = false, Callback = function(v) getgenv().SetCustomHitSoundEnabled(v) end })
+SoundTab:AddCheckbox("CustomKillSound", { Text = "Kill Sound", Default = false, Callback = function(v) getgenv().SetCustomKillSoundEnabled(v) end })
+SoundTab:AddCheckbox("CustomHitSound", { Text = "Hit Sound", Default = false, Callback = function(v) getgenv().SetCustomHitSoundEnabled(v) end })
 SoundTab:AddDivider()
 SoundTab:AddDropdown("KillSound", {
     Values = {"Fahhh", "Epic Kill 1", "Epic Kill 2", "Laugh", "Cat Laughing Meme", "Goofy Laugh", "PVZ Laugh", "CoD Kaboom", "You are a Idiot", "Creepy Bell", "Vine Boom", "RDR2 Low Honor", "Get Out", "Diahrrea Sound", "Goku Prowler", "iPhone Ding", "Bark Fart", "Enrique", "Fatality 2"},
-    Default = 1, Text = "Kill Sound", Callback = function(Value) getgenv().SetKillSound(Value) end,
+    Default = 1, Text = "Kill Sound Pick", Callback = function(Value) getgenv().SetKillSound(Value) end,
 })
 SoundTab:AddDropdown("HitSound", {
     Values = {"TF2 Hit", "Metal Bat Hit", "Neverlose", "Minecraft Hit 1", "Minecraft Hit 2", "MLG Hit", "Fahhh Hit", "Xbox Live Notification", "Rust", "Fatality", "Skeet", "Pick", "Creepy Bell"},
-    Default = 1, Text = "Hit Sound", Callback = function(Value) getgenv().SetHitSound(Value) end,
+    Default = 1, Text = "Hit Sound Pick", Callback = function(Value) getgenv().SetHitSound(Value) end,
 })
 NotifyTab:AddLabel("Effects")
-NotifyTab:AddCheckbox("ColorScreenKillEffect", { Text = "Color Screen Kill Effect", Default = false, Callback = function(v) getgenv().SetKillEffectEnabled(v) end }):AddColorPicker("ColorScreenKillEffectColor", { Default = Color3.fromRGB(255,255,255), Title = "Kill Effect Color", Text = "Kill Effect Color", Callback = function(Value) getgenv().SetKillEffectColor(Value) end })
-NotifyTab:AddSlider("ColorEffectFadeDuration", { Text = "Color Effect Fade Duration", Default = 0.25, Min = 0.05, Max = 1, Rounding = 2, Callback = function(Value) getgenv().SetKillEffectFadeDuration(Value) end })
+NotifyTab:AddCheckbox("ColorScreenKillEffect", { Text = "Kill Screen Flash", Default = false, Callback = function(v) getgenv().SetKillEffectEnabled(v) end }):AddColorPicker("ColorScreenKillEffectColor", { Default = Color3.fromRGB(255,255,255), Title = "Flash Color", Text = "Flash Color", Callback = function(Value) getgenv().SetKillEffectColor(Value) end })
+NotifyTab:AddSlider("ColorEffectFadeDuration", { Text = "Flash Fade", Default = 0.25, Min = 0.05, Max = 1, Rounding = 2, Callback = function(Value) getgenv().SetKillEffectFadeDuration(Value) end })
 NotifyTab:AddDivider("Logs")
 NotifyTab:AddCheckbox("KillLogs", { Text = "Kill Logs", Default = false, Callback = function(v) getgenv().SetKillLogsEnabled(v) end })
 NotifyTab:AddCheckbox("HitLogs", { Text = "Hit Logs", Default = false, Callback = function(v) getgenv().SetHitLogsEnabled(v) end })
 
--- ============ VISUALS ============
-local VisualsLeftBox = Tabs.Visuals:AddLeftGroupbox("Highlight ESP", "eye")
+-- ============ RENDER TAB ============
+local VisualsLeftBox = Tabs.Visuals:AddLeftGroupbox("Highlight", "sparkles")
 VisualsLeftBox:AddCheckbox("ESP", { Text = "Highlight ESP", Default = false, Callback = function(v) getgenv().SilentAimSettings.ESPEnabled = v; updateESP() end })
-VisualsLeftBox:AddLabel("Target Highlight Color"):AddColorPicker("ESPTargetColor", { Default = Color3.fromRGB(255,182,255), Title = "ESP Target Color", Text = "Target Highlight Color", Callback = function(Value) setESPTargetColorRGB(Value) end })
+VisualsLeftBox:AddLabel("Target Color"):AddColorPicker("ESPTargetColor", { Default = Color3.fromRGB(255,59,92), Title = "Target Highlight", Text = "Target Highlight", Callback = function(Value) setESPTargetColorRGB(Value) end })
 
-local NameESPBox = Tabs.Visuals:AddLeftGroupbox("Name ESP", "type-outline")
-NameESPBox:AddCheckbox("EnableNameESP", { Text = "Enable Name ESP", Default = true, Callback = function(v) getgenv().SilentAimSettings.ESPNamesEnabled = v; updateESP() end })
-NameESPBox:AddCheckbox("EnableTargetNameESP", { Text = "Enable Target ESP Name", Default = false, Callback = function(v) getgenv().SilentAimSettings.ESPTargetNameEnabled = v end })
-NameESPBox:AddLabel("Text Color"):AddColorPicker("ESPTextColor", { Default = Color3.fromRGB(255,255,255), Title = "Text Color", Text = "Text Color", Callback = function(Value) setESPTextColor(Value) end })
-NameESPBox:AddLabel("Target Text Color"):AddColorPicker("ESPTargetTextColor", { Default = Color3.fromRGB(255,182,255), Title = "Target Text Color", Text = "Target Text Color", Callback = function(Value) setESPTargetTextColor(Value) end })
+local NameESPBox = Tabs.Visuals:AddLeftGroupbox("Names", "tag")
+NameESPBox:AddCheckbox("EnableNameESP", { Text = "Name ESP", Default = true, Callback = function(v) getgenv().SilentAimSettings.ESPNamesEnabled = v; updateESP() end })
+NameESPBox:AddCheckbox("EnableTargetNameESP", { Text = "Target Label", Default = false, Callback = function(v) getgenv().SilentAimSettings.ESPTargetNameEnabled = v end })
+NameESPBox:AddLabel("Text"):AddColorPicker("ESPTextColor", { Default = Color3.fromRGB(255,255,255), Title = "Text Color", Text = "Text Color", Callback = function(Value) setESPTextColor(Value) end })
+NameESPBox:AddLabel("Target Text"):AddColorPicker("ESPTargetTextColor", { Default = Color3.fromRGB(255,59,92), Title = "Target Text Color", Text = "Target Text Color", Callback = function(Value) setESPTargetTextColor(Value) end })
 NameESPBox:AddDivider()
-NameESPBox:AddSlider("NameESPTextSize", { Text = "Name ESP Text Size", Default = 12, Min = 0, Max = 24, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.ESPNameTextSize = Value end })
-NameESPBox:AddSlider("TargetNameESPTextSize", { Text = "Target Name ESP Text Size", Default = 12, Min = 0, Max = 24, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.ESPTargetNameTextSize = Value end })
+NameESPBox:AddSlider("NameESPTextSize", { Text = "Name Size", Default = 12, Min = 0, Max = 24, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.ESPNameTextSize = Value end })
+NameESPBox:AddSlider("TargetNameESPTextSize", { Text = "Target Size", Default = 12, Min = 0, Max = 24, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.ESPTargetNameTextSize = Value end })
 NameESPBox:AddDivider()
 NameESPBox:AddInput("TargetCustomText", { Text = "", Placeholder = "Target", ClearTextOnFocus = false, Finished = false })
 do
@@ -1584,11 +1336,11 @@ NameESPBox:AddButton({ Text = "Apply", Func = function()
     getgenv().SetTargetCustomText(text)
 end })
 
-local TracerBox = Tabs.Visuals:AddRightGroupbox("Tracer ESP", "zap")
-TracerBox:AddCheckbox("TracerESP", { Text = "Tracer ESP", Default = false, Callback = function(v) getgenv().SilentAimSettings.TracerESPEnabled = v end })
-TracerBox:AddSlider("TracerThickness", { Text = "Tracer Thickness", Default = 0.2, Min = 0.1, Max = 1.5, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.TracerThickness = Value end })
+local TracerBox = Tabs.Visuals:AddRightGroupbox("Tracers", "route")
+TracerBox:AddCheckbox("TracerESP", { Text = "Tracers", Default = false, Callback = function(v) getgenv().SilentAimSettings.TracerESPEnabled = v end })
+TracerBox:AddSlider("TracerThickness", { Text = "Thickness", Default = 0.2, Min = 0.1, Max = 1.5, Rounding = 1, Callback = function(Value) getgenv().SilentAimSettings.TracerThickness = Value end })
 TracerBox:AddCheckbox("TracerTargetOnly", { Text = "Target Only", Default = false, Callback = function(v) getgenv().SilentAimSettings.TracerTargetOnly = v end })
-TracerBox:AddLabel("Target Tracer Color"):AddColorPicker("TracerColor", { Default = Color3.fromRGB(255,182,255), Title = "Target Tracer Color", Text = "Target Tracer Color", Callback = function(Value) setTracerColorRGB(Value) end })
+TracerBox:AddLabel("Color"):AddColorPicker("TracerColor", { Default = Color3.fromRGB(255,59,92), Title = "Tracer Color", Text = "Tracer Color", Callback = function(Value) setTracerColorRGB(Value) end })
 
 local function ClampColorPickerToScreen(OptionIdx)
     local CP = Options[OptionIdx]
@@ -1614,8 +1366,8 @@ for _, n in ipairs({"FOVColor", "ESPTargetColor", "FogColor", "TracerColor", "Bu
     ClampColorPickerToScreen(n)
 end
 
--- ============ TELEPORTS ============
-local TeleportsBox = Tabs.Teleports:AddRightGroupbox("Teleports", "map-pin")
+-- ============ UTILITY TAB: TELEPORTS ============
+local TeleportsBox = Tabs.Teleports:AddRightGroupbox("Teleport", "navigation")
 local TeleportsTabbox = TeleportsBox:AddTabbox()
 local LocationsTab = TeleportsTabbox:AddTab(nil, "map-pin")
 local TeleportPlayerTab = TeleportsTabbox:AddTab(nil, "users")
@@ -1639,8 +1391,8 @@ for _, tp in ipairs(teleports) do
     })
 end
 
-TeleportPlayerTab:AddDivider("Teleport to Player")
-TeleportPlayerTab:AddDropdown("TeleportPlayer", { Values = playerOptions, Default = 1, Text = "Teleport to Player", Callback = function(Value)
+TeleportPlayerTab:AddDivider("Go To Player")
+TeleportPlayerTab:AddDropdown("TeleportPlayer", { Values = playerOptions, Default = 1, Text = "Player", Callback = function(Value)
     if not Value or Value == "Select a player..." then return end
     local target = Players:FindFirstChild(Value)
     if target and target.Character then
@@ -1653,69 +1405,148 @@ TeleportPlayerTab:AddDropdown("TeleportPlayer", { Values = playerOptions, Defaul
         end
     end
 end })
-TeleportPlayerTab:AddButton({ Text = "Update Players List", Func = function()
+TeleportPlayerTab:AddButton({ Text = "Refresh Players", Func = function()
     local opts = {"Select a player..."}
     for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then table.insert(opts, plr.Name) end end
     Options.TeleportPlayer:SetValues(opts)
 end })
-TeleportPlayerTab:AddDivider("View Player")
-TeleportPlayerTab:AddDropdown("ViewPlayer", { Values = viewPlayerOptions, Default = 1, Text = "View Player", Callback = function(Value)
+TeleportPlayerTab:AddDivider("Spectate")
+TeleportPlayerTab:AddDropdown("ViewPlayer", { Values = viewPlayerOptions, Default = 1, Text = "Player", Callback = function(Value)
     if not Value or Value == "Select a player..." then SPECTATE_PLAYER = nil; stopSpectate(); return end
     SPECTATE_PLAYER = Value; startSpectate(Value)
 end })
-TeleportPlayerTab:AddButton({ Text = "Update Players List", Func = function()
+TeleportPlayerTab:AddButton({ Text = "Refresh Players", Func = function()
     local opts = {"Select a player..."}
     for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then table.insert(opts, plr.Name) end end
     SPECTATE_PLAYER = nil; stopSpectate()
     Options.ViewPlayer:SetValues(opts)
 end })
 
--- ============ VEHICLE MOD ============
-local VehicleModBox = Tabs.Teleports:AddRightGroupbox("Vehicle Mod", "car")
-VehicleModBox:SetDescription("Vehicle Modifications")
+-- ============ UTILITY TAB: VEHICLES ============
+local VehicleModBox = Tabs.Teleports:AddRightGroupbox("Vehicles", "car-front")
+VehicleModBox:SetDescription("Fly, speed and car tools")
 local VehicleModsTabbox = VehicleModBox:AddTabbox()
-local VehicleFlyTab = VehicleModsTabbox:AddTab(nil, "wind")
-local VehicleSpeedTab = VehicleModsTabbox:AddTab(nil, "zap")
+local VehicleFlyTab = VehicleModsTabbox:AddTab(nil, "plane")
+local VehicleSpeedTab = VehicleModsTabbox:AddTab(nil, "gauge")
 local VehicleCustomTab = VehicleModsTabbox:AddTab(nil, "car")
 
-VehicleFlyTab:AddCheckbox("EnableVehicleFly", { Text = "Enable Vehicle Fly", Default = false, Callback = function(v) toggleVehicleFly(v) end })
-VehicleFlyTab:AddCheckbox("ShowVehicleFlyButton", { Text = "Show Vehicle Fly Button", Default = false, Callback = function(v) VehicleFlyButton.Visible = v end })
-VehicleFlyTab:AddCheckbox("LockVehicleFlyButton", { Text = "Lock Vehicle Fly Button", Default = false, Callback = function(v) setVehicleFlyLocked(v) end })
-VehicleFlyTab:AddLabel("Vehicle Fly Keybind"):AddKeyPicker("VehicleFlyKeybind", { Default = "None", NoUI = false, Text = "Vehicle Fly Keybind", Callback = function() toggleVehicleFly(not getgenv().SilentAimSettings.VehicleFlyEnabled) end })
+VehicleFlyTab:AddCheckbox("EnableVehicleFly", { Text = "Vehicle Fly", Default = false, Callback = function(v) toggleVehicleFly(v) end })
+VehicleFlyTab:AddCheckbox("ShowVehicleFlyButton", { Text = "Show on-screen button", Default = false, Callback = function(v) VehicleFlyButton.Visible = v end })
+VehicleFlyTab:AddCheckbox("LockVehicleFlyButton", { Text = "Lock button position", Default = false, Callback = function(v) setVehicleFlyLocked(v) end })
+VehicleFlyTab:AddLabel("Keybind"):AddKeyPicker("VehicleFlyKeybind", { Default = "None", NoUI = false, Text = "Vehicle Fly", Callback = function() toggleVehicleFly(not getgenv().SilentAimSettings.VehicleFlyEnabled) end })
 task.spawn(function() while true do task.wait(0.1); getgenv().SilentAimSettings.VehicleFlyKeyCode = Options.VehicleFlyKeybind.Value end end)
 VehicleFlyTab:AddDivider()
-VehicleFlyTab:AddLabel("Sit in vehicle to Activate", true)
+VehicleFlyTab:AddLabel("Sit in a vehicle first", true)
 VehicleFlyTab:AddSlider("VehicleFlyHeight", { Text = "Height (Y)", Default = 0, Min = 0, Max = 65, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.VehicleFlyHeight = Value end })
 VehicleFlyTab:AddButton({ Text = "Flip Vehicle", Func = function() if getgenv().FlipVehicle then getgenv().FlipVehicle() end end })
 
-VehicleSpeedTab:AddCheckbox("VehicleMaxSpeedChanger", { Text = "Vehicle Max speed Changer", Default = false, Callback = function(v) getgenv().SilentAimSettings.VehicleMaxSpeedEnabled = v end })
+VehicleSpeedTab:AddCheckbox("VehicleMaxSpeedChanger", { Text = "Speed Override", Default = false, Callback = function(v) getgenv().SilentAimSettings.VehicleMaxSpeedEnabled = v end })
 VehicleSpeedTab:AddDivider()
-VehicleSpeedTab:AddSlider("VehicleMaxSpeed", { Text = "Vehicle Max Speed", Default = 70, Min = 70, Max = 300, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.VehicleMaxSpeed = Value end })
+VehicleSpeedTab:AddSlider("VehicleMaxSpeed", { Text = "Max Speed", Default = 70, Min = 70, Max = 300, Rounding = 0, Callback = function(Value) getgenv().SilentAimSettings.VehicleMaxSpeed = Value end })
 
-VehicleCustomTab:AddDropdown("CarList", { Values = {}, Default = nil, AllowNull = true, Text = "Car List", Callback = function(Value) getgenv().SilentAimSettings.SelectedCar = Value end })
-VehicleCustomTab:AddButton({ Text = "Refresh List", Func = function()
+VehicleCustomTab:AddDropdown("CarList", { Values = {}, Default = nil, AllowNull = true, Text = "Cars", Callback = function(Value) getgenv().SilentAimSettings.SelectedCar = Value end })
+VehicleCustomTab:AddButton({ Text = "Refresh", Func = function()
     if getgenv().RefreshCarList then Options.CarList:SetValues(getgenv().RefreshCarList()) end
 end })
 VehicleCustomTab:AddButton({ Text = "Bring Car", Func = function()
     if getgenv().BringCar and Options.CarList.Value then getgenv().BringCar(Options.CarList.Value) end
 end })
-VehicleCustomTab:AddButton({ Text = "Teleport to Car", Func = function()
+VehicleCustomTab:AddButton({ Text = "Go To Car", Func = function()
     if getgenv().TeleportToCar and Options.CarList.Value then getgenv().TeleportToCar(Options.CarList.Value) end
 end })
 local Warn = VehicleCustomTab:AddLabel("Bannable, use at your own risk", true)
 do
     local w = Warn.Holder and Warn.Holder:FindFirstChildOfClass("TextLabel")
-    if w then w.TextColor3 = Color3.fromRGB(235, 70, 70) end
+    if w then w.TextColor3 = Color3.fromRGB(255, 120, 60) end
 end
 
--- ============ UI SETTINGS ============
-local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu", "settings")
-MenuGroup:AddCheckbox("KeybindMenuOpen", { Text = "Open Keybind Menu", Default = Library.KeybindFrame.Visible, Callback = function(value) Library.KeybindFrame.Visible = value end })
-MenuGroup:AddCheckbox("ShowCustomCursor", { Text = "Custom Cursor", Default = Library.ShowCustomCursor, Callback = function(Value) Library.ShowCustomCursor = Value end })
-MenuGroup:AddCheckbox("AlwaysOnTop", { Text = "Always On Top", Default = false, Callback = function(Value) Window:SetAlwaysOnTop(Value) end })
-MenuGroup:AddDropdown("NotificationSide", { Values = {"Left", "Right"}, Default = "Right", Text = "Notification Side", Callback = function(Value) Library:SetNotifySide(Value) end })
+-- ============ WATERMARK HUD ============
+local Stats = game:GetService("Stats")
+local WM = Instance.new("Frame")
+WM.Name = "GerixWatermark"
+WM.AnchorPoint = Vector2.new(0.5, 0)
+WM.Position = UDim2.new(0.5, 0, 0, 10)
+WM.Size = UDim2.fromOffset(10, 30)
+WM.AutomaticSize = Enum.AutomaticSize.X
+WM.BackgroundColor3 = Library.Scheme.BackgroundColor
+WM.BorderSizePixel = 0
+WM.ZIndex = 20
+WM.Parent = Library.ScreenGui
+Library:AddToRegistry(WM, { BackgroundColor3 = "BackgroundColor" })
+
+local WMCorner = Instance.new("UICorner")
+WMCorner.CornerRadius = UDim.new(0, Library.CornerRadius)
+WMCorner.Parent = WM
+table.insert(Library.Corners, WMCorner)
+Library:AddOutline(WM)
+
+local WMPad = Instance.new("UIPadding")
+WMPad.PaddingLeft = UDim.new(0, 12)
+WMPad.PaddingRight = UDim.new(0, 12)
+WMPad.Parent = WM
+
+local WMLabel = Instance.new("TextLabel")
+WMLabel.Size = UDim2.new(0, 0, 1, 0)
+WMLabel.AutomaticSize = Enum.AutomaticSize.X
+WMLabel.BackgroundTransparency = 1
+WMLabel.Font = Enum.Font.Code
+WMLabel.TextSize = 14
+WMLabel.TextColor3 = Library.Scheme.FontColor
+WMLabel.Text = "GERIX//HUB"
+WMLabel.ZIndex = 21
+WMLabel.Parent = WM
+Library:AddToRegistry(WMLabel, { TextColor3 = "FontColor" })
+
+local WMLine = Instance.new("Frame")
+WMLine.Size = UDim2.new(1, 24, 0, 2)
+WMLine.Position = UDim2.fromOffset(-12, 0)
+WMLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+WMLine.BorderSizePixel = 0
+WMLine.ZIndex = 22
+WMLine.Parent = WM
+local WMGrad = Instance.new("UIGradient")
+WMGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 59, 92)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 70, 190)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 59, 92)),
+})
+WMGrad.Parent = WMLine
+
+Library:MakeDraggable(WM, WM, true)
+if not table.find(Library.DraggableElements, WM) then table.insert(Library.DraggableElements, WM) end
+
+task.spawn(function()
+    while WM.Parent do
+        WMGrad.Offset = Vector2.new(math.sin(tick() * 1.5) * 0.6, 0)
+        task.wait(0.03)
+    end
+end)
+
+local wmFrames, wmLast = 0, tick()
+RunService.RenderStepped:Connect(function() wmFrames = wmFrames + 1 end)
+task.spawn(function()
+    while WM.Parent do
+        task.wait(0.5)
+        local now = tick()
+        local fps = math.floor(wmFrames / math.max(now - wmLast, 0.001) + 0.5)
+        wmFrames, wmLast = 0, now
+        local ping = "?"
+        pcall(function() ping = tostring(math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) end)
+        pcall(function()
+            WMLabel.Text = string.format("GERIX//HUB  |  %s  |  %d FPS  |  %s ms  |  %s", player.Name, fps, ping, os.date("%H:%M:%S"))
+        end)
+    end
+end)
+
+-- ============ CONFIG TAB ============
+local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu", "layout-dashboard")
+MenuGroup:AddCheckbox("KeybindMenuOpen", { Text = "Show keybind list", Default = Library.KeybindFrame.Visible, Callback = function(value) Library.KeybindFrame.Visible = value end })
+MenuGroup:AddCheckbox("ShowWatermark", { Text = "Show watermark HUD", Default = true, Callback = function(v) WM.Visible = v end })
+MenuGroup:AddCheckbox("ShowCustomCursor", { Text = "Custom cursor", Default = Library.ShowCustomCursor, Callback = function(Value) Library.ShowCustomCursor = Value end })
+MenuGroup:AddCheckbox("AlwaysOnTop", { Text = "Always on top", Default = false, Callback = function(Value) Window:SetAlwaysOnTop(Value) end })
+MenuGroup:AddDropdown("NotificationSide", { Values = {"Left", "Right"}, Default = "Left", Text = "Notifications", Callback = function(Value) Library:SetNotifySide(Value) end })
 MenuGroup:AddDivider()
-MenuGroup:AddLabel("Menu Bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
+MenuGroup:AddLabel("Toggle key"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
 MenuGroup:AddButton("Unload", function() Library:Unload() end)
 
 local function WipeFolder(folder)
@@ -1731,13 +1562,13 @@ local function WipeFolder(folder)
     wipe(folder)
 end
 
-local ResetGroup = Tabs["UI Settings"]:AddRightGroupbox("Config", "trash-2")
+local ResetGroup = Tabs["UI Settings"]:AddRightGroupbox("Reset", "trash-2")
 ResetGroup:SetDescription("Clear saved settings so the menu loads fresh next time")
-ResetGroup:AddButton({ Text = "Reset All Configs", Func = function()
+ResetGroup:AddButton({ Text = "Wipe All Configs", Func = function()
     WipeFolder("GerixHub"); WipeFolder("PrecisionHub")
-    Library:Notify({ Title = "Configs Reset", Text = "All saved configs were deleted. Re-execute to see a fresh menu.", Time = 6 })
+    Library:Notify({ Title = "Configs wiped", Text = "Re-execute to see a fresh menu.", Time = 6 })
 end })
-ResetGroup:AddLabel("Warning: this wipes every saved config permanently.", true)
+ResetGroup:AddLabel("Warning: this deletes every saved config permanently.", true)
 
 Library.ToggleKeybind = Options.MenuKeybind
 
@@ -1750,3 +1581,5 @@ SaveManager:SetFolder("GerixHub/PrisonLife")
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:LoadAutoloadConfig()
+
+Library:Notify({ Title = "GERIX//HUB", Text = "Loaded. Press RightShift to toggle the menu.", Time = 5 })
